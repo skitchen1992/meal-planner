@@ -8,8 +8,10 @@ import Planner from './components/Planner'
 import FilterBar from './components/FilterBar'
 import ShoppingList from './components/ShoppingList'
 import DishesTable from './components/DishesTable'
+import { usePersistState } from './hooks/usePersistState'
 
 function App() {
+  usePersistState()
   const dispatch = useAppDispatch()
   const meals = useAppSelector((state) => state.meals.items)
   const [title, setTitle] = useState('')

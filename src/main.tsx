@@ -4,20 +4,22 @@ import './index.css'
 import App from './App.tsx'
 import { Provider } from 'react-redux'
 import { store } from './app/store'
-import { CssBaseline, Experimental_CssVarsProvider as CssVarsProvider, getInitColorSchemeScript } from '@mui/material'
+import { CssBaseline } from '@mui/material'
+import { ThemeProvider } from '@mui/material/styles'
+import InitColorSchemeScript from '@mui/material/InitColorSchemeScript'
 import { theme } from './theme'
 
 const rootElement = document.getElementById('root')!
 
 createRoot(rootElement).render(
   <StrictMode>
-    {getInitColorSchemeScript()}
-    <CssVarsProvider theme={theme} defaultMode="system">
+    <InitColorSchemeScript defaultMode="system" />
+    <ThemeProvider theme={theme} defaultMode="system">
       <CssBaseline />
       <Provider store={store}>
         <App />
       </Provider>
-    </CssVarsProvider>
+    </ThemeProvider>
   </StrictMode>,
 )
 

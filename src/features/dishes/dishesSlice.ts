@@ -109,6 +109,10 @@ const dishesSlice = createSlice({
       const { dishIndex } = action.payload
       if (state[dishIndex]) state[dishIndex].ingredients.push({ n: '', q: 0, u: '' })
     },
+    removeIngredient(state, action: PayloadAction<{ dishIndex: number; ingIndex: number }>) {
+      const { dishIndex, ingIndex } = action.payload
+      if (state[dishIndex]) state[dishIndex].ingredients.splice(ingIndex, 1)
+    },
     addDish(state) {
       state.push({ name: 'Новое блюдо', type: 'Любое', ingredients: [{ n: 'ингредиент', q: 1, u: 'шт' }] })
     },
@@ -118,7 +122,7 @@ const dishesSlice = createSlice({
   },
 })
 
-export const { resetToTemplate, setDishName, setDishType, setIngredient, addIngredient, addDish, removeDish } = dishesSlice.actions
+export const { resetToTemplate, setDishName, setDishType, setIngredient, addIngredient, removeIngredient, addDish, removeDish } = dishesSlice.actions
 export default dishesSlice.reducer
 
 

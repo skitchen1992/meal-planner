@@ -1,4 +1,5 @@
 import { MenuItem, Select, TextField } from '@mui/material'
+import { Fragment } from 'react'
 import { Card } from './ui/designSystem'
 import { GridPlanner, Cell, MealCell, QtyWrap } from './ui/designSystem'
 import { DAYS, MEALS } from '../constants/planner'
@@ -20,7 +21,7 @@ function Planner() {
           </Cell>
         ))}
         {DAYS.map((day) => (
-          <>
+          <Fragment key={day}>
             <Cell key={`${day}-label`} className="cell day">
               {day}
             </Cell>
@@ -64,7 +65,7 @@ function Planner() {
                 </Cell>
               )
             })}
-          </>
+          </Fragment>
         ))}
       </GridPlanner>
     </Card>

@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '../app/hooks'
 import {
   addDish,
   addIngredient,
+  removeIngredient,
   removeDish,
   resetToTemplate,
   setDishName,
@@ -98,6 +99,9 @@ function DishesTable() {
                         }
                         sx={{ flex: 0.6 }}
                       />
+                      <Button color="error" onClick={() => dispatch(removeIngredient({ dishIndex: idx, ingIndex: i }))}>
+                        Удалить
+                      </Button>
                     </Stack>
                   ))}
                 </Stack>
