@@ -119,7 +119,9 @@ const templateDishes: Dish[] = [
 const initialState: Dish[] = (() => {
   try {
     const raw = localStorage.getItem('mealPlanner.dishes.v2');
-    if (raw) return JSON.parse(raw) as Dish[];
+    if (raw) {
+      return JSON.parse(raw) as Dish[];
+    }
   } catch (error) {
     console.warn('Failed to read dishes from localStorage', error);
   }
@@ -135,26 +137,36 @@ const dishesSlice = createSlice({
     },
     setDishName(state, action: PayloadAction<{ index: number; name: string }>) {
       const { index, name } = action.payload;
-      if (state[index]) state[index].name = name;
+      if (state[index]) {
+        state[index].name = name;
+      }
     },
     setDishType(state, action: PayloadAction<{ index: number; type: Dish['type'] }>) {
       const { index, type } = action.payload;
-      if (state[index]) state[index].type = type;
+      if (state[index]) {
+        state[index].type = type;
+      }
     },
     setIngredient(
       state,
       action: PayloadAction<{ dishIndex: number; ingIndex: number; ingredient: Ingredient }>,
     ) {
       const { dishIndex, ingIndex, ingredient } = action.payload;
-      if (state[dishIndex]) state[dishIndex].ingredients[ingIndex] = ingredient;
+      if (state[dishIndex]) {
+        state[dishIndex].ingredients[ingIndex] = ingredient;
+      }
     },
     addIngredient(state, action: PayloadAction<{ dishIndex: number }>) {
       const { dishIndex } = action.payload;
-      if (state[dishIndex]) state[dishIndex].ingredients.push({ n: '', q: 0, u: '' });
+      if (state[dishIndex]) {
+        state[dishIndex].ingredients.push({ n: '', q: 0, u: '' });
+      }
     },
     removeIngredient(state, action: PayloadAction<{ dishIndex: number; ingIndex: number }>) {
       const { dishIndex, ingIndex } = action.payload;
-      if (state[dishIndex]) state[dishIndex].ingredients.splice(ingIndex, 1);
+      if (state[dishIndex]) {
+        state[dishIndex].ingredients.splice(ingIndex, 1);
+      }
     },
     addDish(state) {
       state.push({

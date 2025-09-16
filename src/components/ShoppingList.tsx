@@ -8,7 +8,9 @@ function ShoppingList() {
   const { rows, summary, copyText } = useShoppingList();
 
   const handleCopy = async () => {
-    if (!rows.length) return;
+    if (!rows.length) {
+      return;
+    }
     try {
       await navigator.clipboard.writeText(copyText);
     } catch (error) {

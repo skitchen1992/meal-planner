@@ -30,8 +30,9 @@ const initialState: WeekState = (() => {
           type LooseWeek = Record<string, Record<string, unknown>>;
           const loose = parsed as unknown as LooseWeek;
           const v = loose?.[d]?.[m];
-          if (typeof v === 'string') out[d][m] = { dish: v || '', qty: 1 };
-          else if (v && typeof v === 'object') {
+          if (typeof v === 'string') {
+            out[d][m] = { dish: v || '', qty: 1 };
+          } else if (v && typeof v === 'object') {
             const obj = v as { dish?: unknown; qty?: unknown };
             out[d][m] = {
               dish: typeof obj.dish === 'string' ? obj.dish : '',

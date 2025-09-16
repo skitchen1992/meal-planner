@@ -27,14 +27,20 @@ export function useShoppingList() {
   const list = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const day of DAYS) {
-      if (!filterDays.includes(day)) continue;
+      if (!filterDays.includes(day)) {
+        continue;
+      }
       for (const meal of Object.keys(week[day])) {
         const entry = week[day][meal];
         const dishName = entry.dish;
         const cellQty = entry.qty ?? 1;
-        if (!dishName) continue;
+        if (!dishName) {
+          continue;
+        }
         const dish = dishes.find((d) => d.name === dishName);
-        if (!dish) continue;
+        if (!dish) {
+          continue;
+        }
         dish.ingredients.forEach((ing) => {
           const key = `${ing.n.trim().toLowerCase()}|${ing.u || ''}`;
           const add = (Number(ing.q) || 0) * people * servPer * (Number(cellQty) || 1);

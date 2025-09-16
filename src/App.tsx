@@ -19,7 +19,9 @@ function App() {
   const [calories, setCalories] = useState<number | ''>('');
 
   const handleAdd = () => {
-    if (!title || calories === '' || Number.isNaN(Number(calories))) return;
+    if (!title || calories === '' || Number.isNaN(Number(calories))) {
+      return;
+    }
     dispatch(
       addMeal({
         id: crypto.randomUUID(),

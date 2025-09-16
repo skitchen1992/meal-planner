@@ -30,6 +30,8 @@ export default tseslint.config([
     },
     rules: {
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+      // Enforce curly braces for all control statements to avoid single-line if/else without blocks
+      curly: ['error', 'all'],
       'import/order': [
         'warn',
         {

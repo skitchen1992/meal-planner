@@ -26,9 +26,13 @@ function Header() {
       const storeApi = (window as Window & { store?: { getState?: () => unknown } }).store;
       const state = (storeApi?.getState?.() ?? {}) as { week?: unknown; dishes?: unknown };
       const weekRaw = JSON.stringify(state.week);
-      if (weekRaw) localStorage.setItem(LS_KEYS.WEEK, weekRaw);
+      if (weekRaw) {
+        localStorage.setItem(LS_KEYS.WEEK, weekRaw);
+      }
       const dishesRaw = JSON.stringify(state.dishes);
-      if (dishesRaw) localStorage.setItem(LS_KEYS.DISHES, dishesRaw);
+      if (dishesRaw) {
+        localStorage.setItem(LS_KEYS.DISHES, dishesRaw);
+      }
     } catch (error) {
       console.warn('Failed to save to localStorage', error);
     }
@@ -36,7 +40,9 @@ function Header() {
   };
 
   const handleResetAll = () => {
-    if (!confirm('Полный сброс данных (меню, блюда, настройки)?')) return;
+    if (!confirm('Полный сброс данных (меню, блюда, настройки)?')) {
+      return;
+    }
     try {
       localStorage.removeItem(LS_KEYS.WEEK);
       localStorage.removeItem(LS_KEYS.DISHES);
@@ -79,18 +85,27 @@ function Header() {
 
   const handleImport: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       try {
         const data = JSON.parse(String(reader.result));
         if (data?.settings) {
-          if (typeof data.settings.people === 'number') dispatch(setPeople(data.settings.people));
-          if (typeof data.settings.servingsPerPerson === 'number')
+          if (typeof data.settings.people === 'number') {
+            dispatch(setPeople(data.settings.people));
+          }
+          if (typeof data.settings.servingsPerPerson === 'number') {
             dispatch(setServingsPerPerson(data.settings.servingsPerPerson));
+          }
         }
-        if (data?.week) dispatch(setWeek(data.week as WeekState));
-        if (Array.isArray(data?.filterDays)) dispatch(setFilterDays(data.filterDays));
+        if (data?.week) {
+          dispatch(setWeek(data.week as WeekState));
+        }
+        if (Array.isArray(data?.filterDays)) {
+          dispatch(setFilterDays(data.filterDays));
+        }
         notify('Данные импортированы ✅');
       } catch (error) {
         console.warn('Import JSON failed', error);

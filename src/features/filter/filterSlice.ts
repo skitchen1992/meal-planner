@@ -8,7 +8,9 @@ export type FilterState = string[];
 const initialState: FilterState = (() => {
   try {
     const raw = localStorage.getItem(LS_KEYS.FILTER);
-    if (raw) return JSON.parse(raw) as string[];
+    if (raw) {
+      return JSON.parse(raw) as string[];
+    }
   } catch (error) {
     console.warn('Failed to read filter from localStorage', error);
   }
@@ -25,8 +27,11 @@ const filterSlice = createSlice({
     toggleDay(state, action: PayloadAction<string>) {
       const day = action.payload;
       const idx = state.indexOf(day);
-      if (idx >= 0) state.splice(idx, 1);
-      else state.push(day);
+      if (idx >= 0) {
+        state.splice(idx, 1);
+      } else {
+        state.push(day);
+      }
     },
     setAll() {
       return DAYS.slice();
