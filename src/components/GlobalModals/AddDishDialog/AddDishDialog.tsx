@@ -16,14 +16,14 @@ import {
 import { FieldArray, Form, Formik } from 'formik';
 import type { FC } from 'react';
 
-import { MEAL_TYPES } from '../../constants/planner';
-import type { Dish } from '../../features/dishes/dishesSlice';
-import { FormikTextField } from '../Formik';
+import { MEAL_TYPES } from '../../../constants/planner';
+import { UNIT, type Unit, type Dish } from '../../../features/dishes/dishesSlice';
+import { FormikTextField } from '../../Formik';
 
 import { submitting } from './submitting';
 import { validationSchema } from './validate';
 
-export type IngredientForm = { name: string; quantity: string; unit: string };
+export type IngredientForm = { name: string; quantity: string; unit: Unit };
 export type FormValues = {
   name: string;
   type: Dish['type'];
@@ -43,7 +43,7 @@ const defaultFormValues: FormValues = {
   name: '',
   type: MEAL_TYPES[0],
   note: '',
-  ingredients: [{ name: '', quantity: '', unit: '' }],
+  ingredients: [{ name: '', quantity: '', unit: UNIT.Gram }],
 };
 
 export const AddDishDialog: FC<AddDishDialogProps> = ({
@@ -137,9 +137,15 @@ export const AddDishDialog: FC<AddDishDialogProps> = ({
                             <FormikTextField
                               name={`ingredients[${idx}].unit`}
                               label="Ед. (г, мл, шт…)"
-                              placeholder="г"
+                              select
                               sx={{ flex: 0.8 }}
-                            />
+                            >
+                              {Object.values(UNIT).map((u) => (
+                                <MenuItem key={u} value={u}>
+                                  {u}
+                                </MenuItem>
+                              ))}
+                            </FormikTextField>
                             <IconButton aria-label="Удалить ингредиент" onClick={() => remove(idx)}>
                               <DeleteOutline />
                             </IconButton>
@@ -147,7 +153,7 @@ export const AddDishDialog: FC<AddDishDialogProps> = ({
                         ))}
                         <Button
                           variant="outlined"
-                          onClick={() => push({ name: '', quantity: '', unit: '' })}
+                          onClick={() => push({ name: '', quantity: '', unit: UNIT.Gram })}
                           sx={{ alignSelf: 'flex-start', mt: 1 }}
                         >
                           Добавить ингредиент

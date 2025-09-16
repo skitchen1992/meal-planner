@@ -1,4 +1,4 @@
-import type { Dish } from '../../features/dishes/dishesSlice';
+import type { Dish } from '../../../features/dishes/dishesSlice.ts';
 
 import type { FormValues } from './AddDishDialog.tsx';
 
@@ -26,7 +26,8 @@ export const submitting = async (
         .map((ing) => ({
           name: ing.name.trim(),
           quantity: Number(ing.quantity) || 0,
-          unit: ing.unit.trim(),
+          // Preserve selected unit string as-is
+          unit: ing.unit,
         })),
     };
     onSubmit(dish);

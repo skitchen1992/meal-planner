@@ -7,8 +7,9 @@ import {
   selectAddDishModal,
   selectConfirmDeleteDishModal,
 } from '../../features/ui/uiSlice';
-import AddDishDialog from '../AddDishDialog/AddDishDialog';
-import { ConfirmDeleteDishDialog } from '../ConfirmDeleteDishDialog/ConfirmDeleteDishDialog';
+
+import AddDishDialog from './AddDishDialog';
+import ConfirmDeleteDishDialog from './ConfirmDeleteDishDialog';
 
 function GlobalModals() {
   const dispatch = useAppDispatch();
