@@ -2,6 +2,7 @@ import { Container, Stack } from '@mui/material';
 
 import DishesTable from './components/DishesTable/DishesTable';
 import FilterBar from './components/FilterBar/FilterBar';
+import GlobalModals from './components/GlobalModals';
 import GlobalSnackbar from './components/GlobalSnackbar';
 import Header from './components/Header/Header';
 import Planner from './components/Planner/Planner';
@@ -20,6 +21,7 @@ function App() {
         <ShoppingList />
         <DishesTable />
         <GlobalSnackbar />
+        <GlobalModals />
       </Stack>
     </Container>
   );

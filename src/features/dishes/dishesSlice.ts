@@ -5,7 +5,12 @@ import type { RootState } from '../../app/store';
 import { MEAL_TYPES } from '../../constants/planner';
 
 export type Ingredient = { n: string; q: number; u: string };
-export type Dish = { name: string; type: (typeof MEAL_TYPES)[number]; ingredients: Ingredient[] };
+export type Dish = {
+  name: string;
+  type: (typeof MEAL_TYPES)[number];
+  ingredients: Ingredient[];
+  note?: string;
+};
 
 const templateDishes: Dish[] = [
   {
@@ -136,6 +141,15 @@ const dishesSlice = createSlice({
     resetToTemplate() {
       return JSON.parse(JSON.stringify(templateDishes)) as Dish[];
     },
+    createDish(state, action: PayloadAction<Dish>) {
+      state.push(action.payload);
+    },
+    updateDish(state, action: PayloadAction<{ index: number; dish: Dish }>) {
+      const { index, dish } = action.payload;
+      if (state[index]) {
+        state[index] = dish;
+      }
+    },
     setDishName(state, action: PayloadAction<{ index: number; name: string }>) {
       const { index, name } = action.payload;
       if (state[index]) {
@@ -185,6 +199,8 @@ const dishesSlice = createSlice({
 export const getDishes = (state: RootState) => state.dishes;
 export const {
   resetToTemplate,
+  createDish,
+  updateDish,
   setDishName,
   setDishType,
   setIngredient,
