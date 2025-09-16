@@ -71,7 +71,7 @@ function DishesTable() {
               secondary={
                 <>
                   <Typography variant="body2">
-                    {d.ingredients.map((i) => `${i.n} ${i.q}${i.u}`).join(', ')}
+                    {d.ingredients.map((i) => `${i.name} ${i.quantity}${i.unit}`).join(', ')}
                   </Typography>
                   <Typography variant="body1">
                     {d.note && d.note.trim() ? `Заметка: ${d.note.trim()}` : null}

@@ -1,4 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close';
+import DeleteOutline from '@mui/icons-material/DeleteOutline';
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
@@ -22,7 +23,7 @@ import { FormikTextField } from '../Formik';
 import { submitting } from './submitting';
 import { validationSchema } from './validate';
 
-export type IngredientForm = { n: string; q: string; u: string };
+export type IngredientForm = { name: string; quantity: string; unit: string };
 export type FormValues = {
   name: string;
   type: Dish['type'];
@@ -42,7 +43,7 @@ const defaultFormValues: FormValues = {
   name: '',
   type: MEAL_TYPES[0],
   note: '',
-  ingredients: [{ n: '', q: '', u: '' }],
+  ingredients: [{ name: '', quantity: '', unit: '' }],
 };
 
 export const AddDishDialog: FC<AddDishDialogProps> = ({
@@ -74,9 +75,9 @@ export const AddDishDialog: FC<AddDishDialogProps> = ({
                 type: initialValues.type,
                 note: initialValues.note ?? '',
                 ingredients: initialValues.ingredients.map((i) => ({
-                  n: i.n,
-                  q: String(i.q),
-                  u: i.u,
+                  name: i.name,
+                  quantity: String(i.quantity),
+                  unit: i.unit,
                 })),
               }
             : defaultFormValues
@@ -119,34 +120,34 @@ export const AddDishDialog: FC<AddDishDialogProps> = ({
                     {({ push, remove }) => (
                       <Stack spacing={1}>
                         {values.ingredients.map((_, idx) => (
-                          <Stack key={idx} direction="row" spacing={1} sx={{ width: '100%' }}>
+                          <Stack key={idx} direction="row" gap={1} sx={{ width: '100%' }}>
                             <FormikTextField
-                              name={`ingredients[${idx}].n`}
+                              name={`ingredients[${idx}].name`}
                               label="Название"
                               placeholder="рис"
                               sx={{ flex: 2 }}
                             />
                             <FormikTextField
-                              name={`ingredients[${idx}].q`}
+                              name={`ingredients[${idx}].quantity`}
                               label="Кол-во"
                               type="number"
                               inputProps={{ step: 0.01, min: 0 }}
                               sx={{ flex: 0.8 }}
                             />
                             <FormikTextField
-                              name={`ingredients[${idx}].u`}
+                              name={`ingredients[${idx}].unit`}
                               label="Ед. (г, мл, шт…)"
                               placeholder="г"
                               sx={{ flex: 0.8 }}
                             />
                             <IconButton aria-label="Удалить ингредиент" onClick={() => remove(idx)}>
-                              <CloseIcon />
+                              <DeleteOutline />
                             </IconButton>
                           </Stack>
                         ))}
                         <Button
                           variant="outlined"
-                          onClick={() => push({ n: '', q: '', u: '' })}
+                          onClick={() => push({ name: '', quantity: '', unit: '' })}
                           sx={{ alignSelf: 'flex-start', mt: 1 }}
                         >
                           Добавить ингредиент

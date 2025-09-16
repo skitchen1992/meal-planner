@@ -42,8 +42,8 @@ export function useShoppingList() {
           continue;
         }
         dish.ingredients.forEach((ing) => {
-          const key = `${ing.n.trim().toLowerCase()}|${ing.u || ''}`;
-          const add = (Number(ing.q) || 0) * people * servPer * (Number(cellQty) || 1);
+          const key = `${ing.name.trim().toLowerCase()}|${ing.unit || ''}`;
+          const add = (Number(ing.quantity) || 0) * people * servPer * (Number(cellQty) || 1);
           counts[key] = (counts[key] || 0) + add;
         });
       }

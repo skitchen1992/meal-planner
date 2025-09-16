@@ -13,19 +13,19 @@ export const validationSchema = Yup.object({
     .of(
       Yup.object({
         // Ingredient name is required
-        n: Yup.string().trim().min(1, 'Укажите название').required('Обязательное поле'),
+        name: Yup.string().trim().min(1, 'Укажите название').required('Обязательное поле'),
         // Quantity must be a number; allow empty which becomes 0 on submit
-        q: Yup.number()
+        quantity: Yup.number()
           .typeError('Должно быть числом')
           .min(0, 'Не меньше 0')
           .nullable()
-          .transform((value, originalValue) => {
+          .transform((_value, originalValue) => {
             const parsed = Number(originalValue);
             return Number.isNaN(parsed) ? null : parsed;
           })
           .required('Обязательное поле'),
         // Unit is optional but recommended
-        u: Yup.string().trim().max(16, 'Слишком длинно'),
+        unit: Yup.string().trim().max(16, 'Слишком длинно'),
       }),
     )
     .min(1, 'Добавьте хотя бы один ингредиент')

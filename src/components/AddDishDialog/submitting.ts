@@ -22,11 +22,11 @@ export const submitting = async (
       type: values.type,
       note: values.note?.trim() ? values.note.trim() : undefined,
       ingredients: values.ingredients
-        .filter((ing) => ing.n.trim() !== '')
+        .filter((ing) => ing.name.trim() !== '')
         .map((ing) => ({
-          n: ing.n.trim(),
-          q: Number(ing.q) || 0,
-          u: ing.u.trim(),
+          name: ing.name.trim(),
+          quantity: Number(ing.quantity) || 0,
+          unit: ing.unit.trim(),
         })),
     };
     onSubmit(dish);

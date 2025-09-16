@@ -4,7 +4,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '../../app/store';
 import { MEAL_TYPES } from '../../constants/planner';
 
-export type Ingredient = { n: string; q: number; u: string };
+export type Ingredient = { name: string; quantity: number; unit: string };
 export type Dish = {
   name: string;
   type: (typeof MEAL_TYPES)[number];
@@ -17,107 +17,107 @@ const templateDishes: Dish[] = [
     name: 'Овсянка',
     type: 'Завтрак',
     ingredients: [
-      { n: 'овсяные хлопья', q: 50, u: 'г' },
-      { n: 'молоко', q: 200, u: 'мл' },
-      { n: 'яблоко', q: 0.5, u: 'шт' },
-      { n: 'мёд', q: 1, u: 'ст.л.' },
+      { name: 'овсяные хлопья', quantity: 50, unit: 'г' },
+      { name: 'молоко', quantity: 200, unit: 'мл' },
+      { name: 'яблоко', quantity: 0.5, unit: 'шт' },
+      { name: 'мёд', quantity: 1, unit: 'ст.л.' },
     ],
   },
   {
     name: 'Омлет с овощами',
     type: 'Завтрак',
     ingredients: [
-      { n: 'яйца', q: 2, u: 'шт' },
-      { n: 'молоко', q: 30, u: 'мл' },
-      { n: 'помидор', q: 0.5, u: 'шт' },
-      { n: 'перец сладкий', q: 0.25, u: 'шт' },
-      { n: 'масло оливковое', q: 1, u: 'ч.л.' },
+      { name: 'яйца', quantity: 2, unit: 'шт' },
+      { name: 'молоко', quantity: 30, unit: 'мл' },
+      { name: 'помидор', quantity: 0.5, unit: 'шт' },
+      { name: 'перец сладкий', quantity: 0.25, unit: 'шт' },
+      { name: 'масло оливковое', quantity: 1, unit: 'ч.л.' },
     ],
   },
   {
     name: 'Суп чечевичный',
     type: 'Обед',
     ingredients: [
-      { n: 'чечевица', q: 80, u: 'г' },
-      { n: 'морковь', q: 0.5, u: 'шт' },
-      { n: 'лук', q: 0.5, u: 'шт' },
-      { n: 'томатная паста', q: 1, u: 'ст.л.' },
-      { n: 'масло растительное', q: 1, u: 'ст.л.' },
-      { n: 'специи', q: 1, u: 'щепотка' },
+      { name: 'чечевица', quantity: 80, unit: 'г' },
+      { name: 'морковь', quantity: 0.5, unit: 'шт' },
+      { name: 'лук', quantity: 0.5, unit: 'шт' },
+      { name: 'томатная паста', quantity: 1, unit: 'ст.л.' },
+      { name: 'масло растительное', quantity: 1, unit: 'ст.л.' },
+      { name: 'специи', quantity: 1, unit: 'щепотка' },
     ],
   },
   {
     name: 'Курица с рисом',
     type: 'Ужин',
     ingredients: [
-      { n: 'куриная грудка', q: 150, u: 'г' },
-      { n: 'рис', q: 70, u: 'г' },
-      { n: 'масло растительное', q: 1, u: 'ст.л.' },
-      { n: 'специи', q: 1, u: 'щепотка' },
+      { name: 'куриная грудка', quantity: 150, unit: 'г' },
+      { name: 'рис', quantity: 70, unit: 'г' },
+      { name: 'масло растительное', quantity: 1, unit: 'ст.л.' },
+      { name: 'специи', quantity: 1, unit: 'щепотка' },
     ],
   },
   {
     name: 'Паста с овощами',
     type: 'Обед',
     ingredients: [
-      { n: 'макароны', q: 100, u: 'г' },
-      { n: 'кабачок', q: 0.5, u: 'шт' },
-      { n: 'томат', q: 1, u: 'шт' },
-      { n: 'чеснок', q: 1, u: 'зубчик' },
-      { n: 'оливковое масло', q: 1, u: 'ст.л.' },
+      { name: 'макароны', quantity: 100, unit: 'г' },
+      { name: 'кабачок', quantity: 0.5, unit: 'шт' },
+      { name: 'томат', quantity: 1, unit: 'шт' },
+      { name: 'чеснок', quantity: 1, unit: 'зубчик' },
+      { name: 'оливковое масло', quantity: 1, unit: 'ст.л.' },
     ],
   },
   {
     name: 'Рыба запечённая',
     type: 'Ужин',
     ingredients: [
-      { n: 'филе рыбы', q: 160, u: 'г' },
-      { n: 'лимон', q: 0.25, u: 'шт' },
-      { n: 'масло оливковое', q: 1, u: 'ст.л.' },
-      { n: 'соль', q: 1, u: 'щепотка' },
+      { name: 'филе рыбы', quantity: 160, unit: 'г' },
+      { name: 'лимон', quantity: 0.25, unit: 'шт' },
+      { name: 'масло оливковое', quantity: 1, unit: 'ст.л.' },
+      { name: 'соль', quantity: 1, unit: 'щепотка' },
     ],
   },
   {
     name: 'Салат греческий',
     type: 'Любое',
     ingredients: [
-      { n: 'огурец', q: 0.5, u: 'шт' },
-      { n: 'помидор', q: 1, u: 'шт' },
-      { n: 'перец сладкий', q: 0.25, u: 'шт' },
-      { n: 'фета', q: 60, u: 'г' },
-      { n: 'оливки', q: 40, u: 'г' },
-      { n: 'оливковое масло', q: 1, u: 'ст.л.' },
+      { name: 'огурец', quantity: 0.5, unit: 'шт' },
+      { name: 'помидор', quantity: 1, unit: 'шт' },
+      { name: 'перец сладкий', quantity: 0.25, unit: 'шт' },
+      { name: 'фета', quantity: 60, unit: 'г' },
+      { name: 'оливки', quantity: 40, unit: 'г' },
+      { name: 'оливковое масло', quantity: 1, unit: 'ст.л.' },
     ],
   },
   {
     name: 'Борщ быстрый',
     type: 'Обед',
     ingredients: [
-      { n: 'свекла', q: 0.5, u: 'шт' },
-      { n: 'капуста', q: 150, u: 'г' },
-      { n: 'морковь', q: 0.5, u: 'шт' },
-      { n: 'лук', q: 0.5, u: 'шт' },
-      { n: 'томатная паста', q: 1, u: 'ст.л.' },
+      { name: 'свекла', quantity: 0.5, unit: 'шт' },
+      { name: 'капуста', quantity: 150, unit: 'г' },
+      { name: 'морковь', quantity: 0.5, unit: 'шт' },
+      { name: 'лук', quantity: 0.5, unit: 'шт' },
+      { name: 'томатная паста', quantity: 1, unit: 'ст.л.' },
     ],
   },
   {
     name: 'Лосось с булгуром',
     type: 'Ужин',
     ingredients: [
-      { n: 'лосось', q: 170, u: 'г' },
-      { n: 'булгур', q: 70, u: 'г' },
-      { n: 'лимон', q: 0.25, u: 'шт' },
-      { n: 'оливковое масло', q: 1, u: 'ст.л.' },
+      { name: 'лосось', quantity: 170, unit: 'г' },
+      { name: 'булгур', quantity: 70, unit: 'г' },
+      { name: 'лимон', quantity: 0.25, unit: 'шт' },
+      { name: 'оливковое масло', quantity: 1, unit: 'ст.л.' },
     ],
   },
   {
     name: 'Сэндвич с индейкой',
     type: 'Любое',
     ingredients: [
-      { n: 'хлеб', q: 2, u: 'ломт' },
-      { n: 'индейка (нарезка)', q: 60, u: 'г' },
-      { n: 'сыр', q: 30, u: 'г' },
-      { n: 'листья салата', q: 2, u: 'шт' },
+      { name: 'хлеб', quantity: 2, unit: 'ломт' },
+      { name: 'индейка (нарезка)', quantity: 60, unit: 'г' },
+      { name: 'сыр', quantity: 30, unit: 'г' },
+      { name: 'листья салата', quantity: 2, unit: 'шт' },
     ],
   },
 ];
@@ -126,7 +126,31 @@ const initialState: Dish[] = (() => {
   try {
     const raw = localStorage.getItem('mealPlanner.dishes.v2');
     if (raw) {
-      return JSON.parse(raw) as Dish[];
+      // Migrate ingredients from legacy keys (n/q/u) to new keys (name/quantity/unit)
+      const parsed = JSON.parse(raw) as unknown as Array<{
+        name: string;
+        type: Dish['type'];
+        note?: string;
+        ingredients: Array<{
+          n?: string;
+          q?: number;
+          u?: string;
+          name?: string;
+          quantity?: number;
+          unit?: string;
+        }>;
+      }>;
+      const migrated = parsed.map((dish) => ({
+        name: dish.name,
+        type: dish.type,
+        note: dish.note,
+        ingredients: (dish.ingredients || []).map((ing) => ({
+          name: ing.name ?? ing.n ?? '',
+          quantity: ing.quantity ?? ing.q ?? 0,
+          unit: ing.unit ?? ing.u ?? '',
+        })),
+      }));
+      return migrated as Dish[];
     }
   } catch (error) {
     console.warn('Failed to read dishes from localStorage', error);
@@ -174,7 +198,7 @@ const dishesSlice = createSlice({
     addIngredient(state, action: PayloadAction<{ dishIndex: number }>) {
       const { dishIndex } = action.payload;
       if (state[dishIndex]) {
-        state[dishIndex].ingredients.push({ n: '', q: 0, u: '' });
+        state[dishIndex].ingredients.push({ name: '', quantity: 0, unit: '' });
       }
     },
     removeIngredient(state, action: PayloadAction<{ dishIndex: number; ingIndex: number }>) {
@@ -187,7 +211,7 @@ const dishesSlice = createSlice({
       state.push({
         name: 'Новое блюдо',
         type: 'Любое',
-        ingredients: [{ n: 'ингредиент', q: 1, u: 'шт' }],
+        ingredients: [{ name: 'ингредиент', quantity: 1, unit: 'шт' }],
       });
     },
     removeDish(state, action: PayloadAction<number>) {
