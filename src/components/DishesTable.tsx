@@ -68,7 +68,7 @@ function DishesTable() {
                   fullWidth
                   value={d.type}
                   onChange={(e) =>
-                    dispatch(setDishType({ index: idx, type: e.target.value as any }))
+                    dispatch(setDishType({ index: idx, type: e.target.value as (typeof MEAL_TYPES)[number] }))
                   }
                 >
                   {MEAL_TYPES.map((t) => (

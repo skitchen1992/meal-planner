@@ -24,11 +24,14 @@ function Header() {
     const settings = { people, servingsPerPerson };
     try {
       localStorage.setItem(LS_KEYS.SETTINGS, JSON.stringify(settings));
-      const weekRaw = JSON.stringify((window as any).store?.getState?.().week);
+      // Narrowed `window` type for store access
+      const weekRaw = JSON.stringify((window as unknown as { store?: { getState?: () => any } }).store?.getState?.().week);
       if (weekRaw) localStorage.setItem(LS_KEYS.WEEK, weekRaw);
-      const dishesRaw = JSON.stringify((window as any).store?.getState?.().dishes);
+      const dishesRaw = JSON.stringify((window as unknown as { store?: { getState?: () => any } }).store?.getState?.().dishes);
       if (dishesRaw) localStorage.setItem(LS_KEYS.DISHES, dishesRaw);
-    } catch {}
+    } catch (error) {
+      // Swallowing errors in UI interaction, not critical for flow
+    }
     notify('Меню сохранено ✅');
   };
 
@@ -39,7 +42,9 @@ function Header() {
       localStorage.removeItem(LS_KEYS.DISHES);
       localStorage.removeItem(LS_KEYS.SETTINGS);
       localStorage.removeItem(LS_KEYS.FILTER);
-    } catch {}
+    } catch (error) {
+      // Ignore localStorage errors (e.g., quota, privacy mode)
+    }
     dispatch(setPeople(2));
     dispatch(setServingsPerPerson(1));
     dispatch(resetWeek());
@@ -49,7 +54,7 @@ function Header() {
   const handlePrint = () => window.print();
 
   const handleExport = () => {
-    const state = (window as any).store?.getState?.();
+    const state = (window as unknown as { store?: { getState?: () => unknown } }).store?.getState?.();
     const data = {
       version: 2,
       settings: { people, servingsPerPerson },
