@@ -20,3 +20,6 @@ createRoot(rootElement).render(
     </CssVarsProvider>
   </StrictMode>,
 )
+
+// Expose store for export/import snapshotting (UI uses it; not for production)
+;(window as any).store = store

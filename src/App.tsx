@@ -3,6 +3,11 @@ import './App.css'
 import { useState } from 'react'
 import { addMeal, removeMeal } from './features/meals/mealsSlice'
 import { useAppDispatch, useAppSelector } from './app/hooks'
+import Header from './components/Header'
+import Planner from './components/Planner'
+import FilterBar from './components/FilterBar'
+import ShoppingList from './components/ShoppingList'
+import DishesTable from './components/DishesTable'
 
 function App() {
   const dispatch = useAppDispatch()
@@ -24,11 +29,13 @@ function App() {
   }
 
   return (
-    <Container maxWidth="sm">
-      <Stack spacing={2} mt={4}>
-        <Typography variant="h4" component="h1">
-          Meal Planner
-        </Typography>
+    <Container maxWidth="md">
+      <Stack spacing={3} mt={4}>
+        <Header />
+        <Planner />
+        <FilterBar />
+        <ShoppingList />
+        <DishesTable />
         <TextField
           label="Meal title"
           value={title}
