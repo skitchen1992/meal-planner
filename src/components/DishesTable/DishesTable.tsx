@@ -12,8 +12,8 @@ import {
   Paper,
 } from '@mui/material';
 
-import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { MEAL_TYPES } from '../constants/planner';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import { MEAL_TYPES } from '../../constants/planner';
 import {
   addDish,
   addIngredient,
@@ -23,9 +23,7 @@ import {
   setDishName,
   setDishType,
   setIngredient,
-} from '../features/dishes/dishesSlice';
-
-// Replaced custom Card/MutedTextSmall with MUI Paper/Typo
+} from '../../features/dishes/dishesSlice';
 
 function DishesTable() {
   const dispatch = useAppDispatch();

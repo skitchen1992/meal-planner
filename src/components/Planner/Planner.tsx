@@ -1,16 +1,16 @@
 import { Box, MenuItem, Paper, Select, TextField, Typography } from '@mui/material';
 import { Fragment } from 'react';
 
-import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { DAYS, MEALS } from '../constants/planner';
-import { setCellDish, setCellQty } from '../features/week/weekSlice';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import { DAYS, MEALS } from '../../constants/planner';
+import { setCellDish, setCellQty } from '../../features/week/weekSlice';
 
-// Replaced custom layout components with MUI Box/Paper
+import selector from './selector';
 
-function Planner() {
+const Planner = () => {
   const dispatch = useAppDispatch();
-  const week = useAppSelector((s) => s.week);
-  const dishes = useAppSelector((s) => s.dishes);
+
+  const { week, dishes } = useAppSelector(selector);
 
   return (
     <Paper sx={{ p: 2 }}>
@@ -25,23 +25,17 @@ function Planner() {
           sx={{
             backgroundColor: 'transparent',
             border: 'none',
-            color: 'text.secondary',
-            fontWeight: 800,
           }}
         >
-          День
+          <Typography variant="body1" fontWeight={'bold'}>
+            День
+          </Typography>
         </Box>
         {MEALS.map((m) => (
-          <Box
-            key={m}
-            sx={{
-              backgroundColor: 'transparent',
-              border: 'none',
-              color: 'text.secondary',
-              fontWeight: 800,
-            }}
-          >
-            {m}
+          <Box key={m}>
+            <Typography variant="body1" fontWeight={'bold'}>
+              {m}
+            </Typography>
           </Box>
         ))}
         {DAYS.map((day) => (
@@ -49,7 +43,6 @@ function Planner() {
             <Box
               key={`${day}-label`}
               sx={{
-                backgroundColor: 'background.paper',
                 p: 1,
                 border: 1,
                 borderColor: 'divider',
@@ -57,10 +50,11 @@ function Planner() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1,
-                fontWeight: 700,
               }}
             >
-              {day}
+              <Typography variant="body1" fontWeight={'bold'}>
+                {day}
+              </Typography>
             </Box>
             {MEALS.map((meal) => {
               const entry = week[day][meal];
@@ -83,13 +77,14 @@ function Planner() {
                   <Box
                     sx={{
                       display: 'grid',
-                      gridTemplateColumns: { xs: '1fr', md: '1fr 78px' },
+                      gridTemplateColumns: { xs: '1fr', md: '1fr 120px' },
                       gap: 1,
                       alignItems: 'center',
                     }}
                   >
                     <Select
                       displayEmpty
+                      size="small"
                       value={entry.dish}
                       onChange={(e) =>
                         dispatch(
@@ -114,13 +109,14 @@ function Planner() {
                         Порц.:
                       </Typography>
                       <TextField
+                        size="small"
                         type="number"
                         inputProps={{ min: 0, step: 0.5 }}
                         value={entry.qty}
                         onChange={(e) =>
                           dispatch(setCellQty({ day, meal, qty: Number(e.target.value || 0) }))
                         }
-                        sx={{ maxWidth: 78 }}
+                        sx={{ maxWidth: 120 }}
                       />
                     </Box>
                   </Box>
@@ -132,6 +128,6 @@ function Planner() {
       </Box>
     </Paper>
   );
-}
+};
 
 export default Planner;

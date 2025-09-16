@@ -1,10 +1,8 @@
 import { Button, Stack, Typography, Paper } from '@mui/material';
 
-import { useShoppingList } from '../hooks/useShoppingList';
+import { useShoppingList } from '../../hooks/useShoppingList';
 
-// Replaced custom Card/MutedTextSmall with MUI Paper/Typo
-
-function ShoppingList() {
+const ShoppingList = () => {
   const { rows, summary, copyText } = useShoppingList();
 
   const handleCopy = async () => {
@@ -44,6 +42,6 @@ function ShoppingList() {
       </Typography>
     </Paper>
   );
-}
+};
 
 export default ShoppingList;
