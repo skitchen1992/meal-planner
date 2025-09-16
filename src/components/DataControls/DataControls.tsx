@@ -2,6 +2,7 @@ import { Button, Grid } from '@mui/material';
 import React, { useRef } from 'react';
 
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import { setDishes } from '../../features/dishes/dishesSlice';
 import { setFilterDays } from '../../features/filter/filterSlice';
 import { setPeople, setServingsPerPerson } from '../../features/settings/settingsSlice';
 import { showSnackbar } from '../../features/ui/uiSlice';
@@ -47,6 +48,7 @@ const DataControls: React.FC = () => {
     reader.onload = () => {
       try {
         const data = JSON.parse(String(reader.result));
+
         if (data?.settings) {
           if (typeof data.settings.people === 'number') {
             dispatch(setPeople(data.settings.people));
@@ -60,6 +62,9 @@ const DataControls: React.FC = () => {
         }
         if (Array.isArray(data?.filterDays)) {
           dispatch(setFilterDays(data.filterDays));
+        }
+        if (data?.dishes) {
+          dispatch(setDishes(data.dishes));
         }
         dispatch(showSnackbar({ message: 'Данные импортированы ✅' }));
       } catch (error) {

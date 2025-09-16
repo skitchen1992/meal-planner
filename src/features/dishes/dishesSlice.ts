@@ -48,115 +48,7 @@ export type Dish = {
   note?: string;
 };
 
-export const templateDishes: Dish[] = [
-  {
-    name: 'Овсянка',
-    type: 'Завтрак',
-    ingredients: [
-      { name: 'овсяные хлопья', quantity: 50, unit: UNIT.Gram },
-      { name: 'молоко', quantity: 200, unit: UNIT.Milliliter },
-      { name: 'яблоко', quantity: 0.5, unit: UNIT.Piece },
-      { name: 'мёд', quantity: 1, unit: UNIT.Tablespoon },
-    ],
-  },
-  {
-    name: 'Омлет с овощами',
-    type: 'Завтрак',
-    ingredients: [
-      { name: 'яйца', quantity: 2, unit: UNIT.Piece },
-      { name: 'молоко', quantity: 30, unit: UNIT.Milliliter },
-      { name: 'помидор', quantity: 0.5, unit: UNIT.Piece },
-      { name: 'перец сладкий', quantity: 0.25, unit: UNIT.Piece },
-      { name: 'масло оливковое', quantity: 1, unit: UNIT.Teaspoon },
-    ],
-  },
-  {
-    name: 'Суп чечевичный',
-    type: 'Обед',
-    ingredients: [
-      { name: 'чечевица', quantity: 80, unit: UNIT.Gram },
-      { name: 'морковь', quantity: 0.5, unit: UNIT.Piece },
-      { name: 'лук', quantity: 0.5, unit: UNIT.Piece },
-      { name: 'томатная паста', quantity: 1, unit: UNIT.Tablespoon },
-      { name: 'масло растительное', quantity: 1, unit: UNIT.Tablespoon },
-      { name: 'специи', quantity: 1, unit: UNIT.Pinch },
-    ],
-  },
-  {
-    name: 'Курица с рисом',
-    type: 'Ужин',
-    ingredients: [
-      { name: 'куриная грудка', quantity: 150, unit: UNIT.Gram },
-      { name: 'рис', quantity: 70, unit: UNIT.Gram },
-      { name: 'масло растительное', quantity: 1, unit: UNIT.Tablespoon },
-      { name: 'специи', quantity: 1, unit: UNIT.Pinch },
-    ],
-  },
-  {
-    name: 'Паста с овощами',
-    type: 'Обед',
-    ingredients: [
-      { name: 'макароны', quantity: 100, unit: UNIT.Gram },
-      { name: 'кабачок', quantity: 0.5, unit: UNIT.Piece },
-      { name: 'томат', quantity: 1, unit: UNIT.Piece },
-      { name: 'чеснок', quantity: 1, unit: UNIT.Piece },
-      { name: 'оливковое масло', quantity: 1, unit: UNIT.Tablespoon },
-    ],
-  },
-  {
-    name: 'Рыба запечённая',
-    type: 'Ужин',
-    ingredients: [
-      { name: 'филе рыбы', quantity: 160, unit: UNIT.Gram },
-      { name: 'лимон', quantity: 0.25, unit: UNIT.Piece },
-      { name: 'масло оливковое', quantity: 1, unit: UNIT.Tablespoon },
-      { name: 'соль', quantity: 1, unit: UNIT.Pinch },
-    ],
-  },
-  {
-    name: 'Салат греческий',
-    type: 'Любое',
-    ingredients: [
-      { name: 'огурец', quantity: 0.5, unit: UNIT.Piece },
-      { name: 'помидор', quantity: 1, unit: UNIT.Piece },
-      { name: 'перец сладкий', quantity: 0.25, unit: UNIT.Piece },
-      { name: 'фета', quantity: 60, unit: UNIT.Gram },
-      { name: 'оливки', quantity: 40, unit: UNIT.Gram },
-      { name: 'оливковое масло', quantity: 1, unit: UNIT.Tablespoon },
-    ],
-  },
-  {
-    name: 'Борщ быстрый',
-    type: 'Обед',
-    ingredients: [
-      { name: 'свекла', quantity: 0.5, unit: UNIT.Piece },
-      { name: 'капуста', quantity: 150, unit: UNIT.Gram },
-      { name: 'морковь', quantity: 0.5, unit: UNIT.Piece },
-      { name: 'лук', quantity: 0.5, unit: UNIT.Piece },
-      { name: 'томатная паста', quantity: 1, unit: UNIT.Tablespoon },
-    ],
-  },
-  {
-    name: 'Лосось с булгуром',
-    type: 'Ужин',
-    ingredients: [
-      { name: 'лосось', quantity: 170, unit: UNIT.Gram },
-      { name: 'булгур', quantity: 70, unit: UNIT.Gram },
-      { name: 'лимон', quantity: 0.25, unit: UNIT.Piece },
-      { name: 'оливковое масло', quantity: 1, unit: UNIT.Tablespoon },
-    ],
-  },
-  {
-    name: 'Сэндвич с индейкой',
-    type: 'Любое',
-    ingredients: [
-      { name: 'хлеб', quantity: 2, unit: UNIT.Piece },
-      { name: 'индейка (нарезка)', quantity: 60, unit: UNIT.Gram },
-      { name: 'сыр', quantity: 30, unit: UNIT.Gram },
-      { name: 'листья салата', quantity: 2, unit: UNIT.Piece },
-    ],
-  },
-];
+export const templateDishes: Dish[] = [];
 
 const initialState: Dish[] = (() => {
   try {
@@ -236,6 +128,9 @@ const dishesSlice = createSlice({
         ingredients: [{ name: 'ингредиент', quantity: 1, unit: UNIT.Piece }],
       });
     },
+    setDishes(state, action: PayloadAction<Dish[]>) {
+      state.splice(0, state.length, ...action.payload);
+    },
     removeDish(state, action: PayloadAction<number>) {
       state.splice(action.payload, 1);
     },
@@ -254,5 +149,6 @@ export const {
   removeIngredient,
   addDish,
   removeDish,
+  setDishes,
 } = dishesSlice.actions;
 export default dishesSlice.reducer;
