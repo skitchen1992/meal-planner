@@ -1,6 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
+import type { RootState } from '../../app/store';
+
 export type SettingsState = {
   people: number;
   servingsPerPerson: number;
@@ -25,6 +27,9 @@ const settingsSlice = createSlice({
     },
   },
 });
+
+export const getPeople = (state: RootState) => state.settings.people;
+export const getServingsPerPerson = (state: RootState) => state.settings.servingsPerPerson;
 
 export const { setPeople, setServingsPerPerson } = settingsSlice.actions;
 export default settingsSlice.reducer;

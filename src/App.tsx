@@ -1,19 +1,31 @@
-import { Button, Container, List, ListItem, ListItemText, Stack, TextField } from '@mui/material';
+import {
+  Button,
+  Container,
+  List,
+  ListItem,
+  ListItemText,
+  Snackbar,
+  Stack,
+  TextField,
+} from '@mui/material';
 import { useState } from 'react';
 
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import DishesTable from './components/DishesTable';
 import FilterBar from './components/FilterBar';
-import Header from './components/Header';
+import Header from './components/Header/Header';
 import Planner from './components/Planner';
 import ShoppingList from './components/ShoppingList';
 import { addMeal, removeMeal } from './features/meals/mealsSlice';
+import { hideSnackbar } from './features/ui/uiSlice';
 import { usePersistState } from './hooks/usePersistState';
 
 function App() {
   usePersistState();
   const dispatch = useAppDispatch();
   const meals = useAppSelector((state) => state.meals.items);
+  const snackbarMessage = useAppSelector((state) => state.ui.snackbarMessage);
+  const snackbarDurationMs = useAppSelector((state) => state.ui.snackbarDurationMs);
   const [title, setTitle] = useState('');
   const [calories, setCalories] = useState<number | ''>('');
 
@@ -40,6 +52,13 @@ function App() {
         <FilterBar />
         <ShoppingList />
         <DishesTable />
+        <Snackbar
+          open={Boolean(snackbarMessage)}
+          autoHideDuration={snackbarDurationMs}
+          onClose={() => dispatch(hideSnackbar())}
+          message={snackbarMessage || ''}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        />
         <TextField
           label="Meal title"
           value={title}

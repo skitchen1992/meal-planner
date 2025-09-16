@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
+import type { RootState } from '../../app/store';
 import { DAYS, MEALS } from '../../constants/planner';
 
 export type CellValue = { dish: string; qty: number };
@@ -69,6 +70,8 @@ const weekSlice = createSlice({
     },
   },
 });
+
+export const getWeek = (state: RootState) => state.week;
 
 export const { setCellDish, setCellQty, resetWeek, setWeek } = weekSlice.actions;
 export default weekSlice.reducer;

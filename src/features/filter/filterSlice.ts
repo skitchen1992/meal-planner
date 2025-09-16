@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
+import type { RootState } from '../../app/store';
 import { DAYS, LS_KEYS } from '../../constants/planner';
 
 export type FilterState = string[];
@@ -45,5 +46,6 @@ const filterSlice = createSlice({
   },
 });
 
+export const getFilterDays = (state: RootState) => state.filterDays;
 export const { setFilterDays, toggleDay, setAll, setWork, setWeekend } = filterSlice.actions;
 export default filterSlice.reducer;

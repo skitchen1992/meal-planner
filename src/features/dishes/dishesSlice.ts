@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
+import type { RootState } from '../../app/store';
 import { MEAL_TYPES } from '../../constants/planner';
 
 export type Ingredient = { n: string; q: number; u: string };
@@ -181,6 +182,7 @@ const dishesSlice = createSlice({
   },
 });
 
+export const getDishes = (state: RootState) => state.dishes;
 export const {
   resetToTemplate,
   setDishName,
