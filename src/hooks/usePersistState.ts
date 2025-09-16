@@ -13,24 +13,32 @@ export function usePersistState() {
   useEffect(() => {
     try {
       localStorage.setItem(LS_KEYS.SETTINGS, JSON.stringify(settings));
-    } catch {}
+    } catch (error) {
+      console.warn('Persist settings failed', error);
+    }
   }, [settings]);
 
   useEffect(() => {
     try {
       localStorage.setItem(LS_KEYS.WEEK, JSON.stringify(week));
-    } catch {}
+    } catch (error) {
+      console.warn('Persist week failed', error);
+    }
   }, [week]);
 
   useEffect(() => {
     try {
       localStorage.setItem(LS_KEYS.DISHES, JSON.stringify(dishes));
-    } catch {}
+    } catch (error) {
+      console.warn('Persist dishes failed', error);
+    }
   }, [dishes]);
 
   useEffect(() => {
     try {
       localStorage.setItem(LS_KEYS.FILTER, JSON.stringify(filterDays));
-    } catch {}
+    } catch (error) {
+      console.warn('Persist filterDays failed', error);
+    }
   }, [filterDays]);
 }

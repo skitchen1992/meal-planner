@@ -10,7 +10,6 @@ import type { WeekState } from '../features/week/weekSlice';
 
 import { GhostButton, Tag, Pill } from './ui/designSystem';
 
-
 function Header() {
   const dispatch = useAppDispatch();
   const people = useAppSelector((s) => s.settings.people);
@@ -24,13 +23,14 @@ function Header() {
     const settings = { people, servingsPerPerson };
     try {
       localStorage.setItem(LS_KEYS.SETTINGS, JSON.stringify(settings));
-      // Narrowed `window` type for store access
-      const weekRaw = JSON.stringify((window as unknown as { store?: { getState?: () => any } }).store?.getState?.().week);
+      const storeApi = (window as Window & { store?: { getState?: () => unknown } }).store;
+      const state = (storeApi?.getState?.() ?? {}) as { week?: unknown; dishes?: unknown };
+      const weekRaw = JSON.stringify(state.week);
       if (weekRaw) localStorage.setItem(LS_KEYS.WEEK, weekRaw);
-      const dishesRaw = JSON.stringify((window as unknown as { store?: { getState?: () => any } }).store?.getState?.().dishes);
+      const dishesRaw = JSON.stringify(state.dishes);
       if (dishesRaw) localStorage.setItem(LS_KEYS.DISHES, dishesRaw);
     } catch (error) {
-      // Swallowing errors in UI interaction, not critical for flow
+      console.warn('Failed to save to localStorage', error);
     }
     notify('Меню сохранено ✅');
   };
@@ -43,7 +43,7 @@ function Header() {
       localStorage.removeItem(LS_KEYS.SETTINGS);
       localStorage.removeItem(LS_KEYS.FILTER);
     } catch (error) {
-      // Ignore localStorage errors (e.g., quota, privacy mode)
+      console.warn('Failed to cleanup localStorage', error);
     }
     dispatch(setPeople(2));
     dispatch(setServingsPerPerson(1));
@@ -54,7 +54,12 @@ function Header() {
   const handlePrint = () => window.print();
 
   const handleExport = () => {
-    const state = (window as unknown as { store?: { getState?: () => unknown } }).store?.getState?.();
+    const storeApi = (window as Window & { store?: { getState?: () => unknown } }).store;
+    const state = (storeApi?.getState?.() ?? {}) as {
+      week?: unknown;
+      dishes?: unknown;
+      filterDays?: unknown;
+    };
     const data = {
       version: 2,
       settings: { people, servingsPerPerson },
@@ -87,7 +92,8 @@ function Header() {
         if (data?.week) dispatch(setWeek(data.week as WeekState));
         if (Array.isArray(data?.filterDays)) dispatch(setFilterDays(data.filterDays));
         notify('Данные импортированы ✅');
-      } catch (err) {
+      } catch (error) {
+        console.warn('Import JSON failed', error);
         alert('Ошибка импорта');
       }
     };

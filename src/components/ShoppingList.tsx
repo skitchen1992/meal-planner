@@ -11,7 +11,9 @@ function ShoppingList() {
     if (!rows.length) return;
     try {
       await navigator.clipboard.writeText(copyText);
-    } catch {}
+    } catch (error) {
+      console.warn('Clipboard write failed', error);
+    }
   };
 
   return (

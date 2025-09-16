@@ -120,7 +120,9 @@ const initialState: Dish[] = (() => {
   try {
     const raw = localStorage.getItem('mealPlanner.dishes.v2');
     if (raw) return JSON.parse(raw) as Dish[];
-  } catch {}
+  } catch (error) {
+    console.warn('Failed to read dishes from localStorage', error);
+  }
   return templateDishes;
 })();
 

@@ -9,7 +9,9 @@ const initialState: FilterState = (() => {
   try {
     const raw = localStorage.getItem(LS_KEYS.FILTER);
     if (raw) return JSON.parse(raw) as string[];
-  } catch {}
+  } catch (error) {
+    console.warn('Failed to read filter from localStorage', error);
+  }
   return DAYS.slice();
 })();
 

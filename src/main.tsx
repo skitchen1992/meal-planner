@@ -1,16 +1,13 @@
+import { CssBaseline } from '@mui/material';
+import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
+import { ThemeProvider } from '@mui/material/styles';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-
-import './index.css';
 import { Provider } from 'react-redux';
 
 import { store } from './app/store';
 import App from './App.tsx';
-
-import { CssBaseline } from '@mui/material';
-import { ThemeProvider } from '@mui/material/styles';
-import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
-
+import './index.css';
 import { theme } from './theme';
 
 const rootElement = document.getElementById('root')!;
@@ -28,4 +25,4 @@ createRoot(rootElement).render(
 );
 
 // Expose store for export/import snapshotting (UI uses it; not for production)
-(window as any).store = store;
+(window as Window & { store?: typeof store }).store = store;
