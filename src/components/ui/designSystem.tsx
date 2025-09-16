@@ -1,5 +1,5 @@
-import { styled } from '@mui/material/styles'
-import { Box, Button, Chip as MuiChip, Paper, Typography } from '@mui/material'
+import { Box, Button, Chip as MuiChip, Paper, Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
 // Card equivalent for .card
 export const Card = styled(Paper)(({ theme }) => ({
@@ -7,7 +7,7 @@ export const Card = styled(Paper)(({ theme }) => ({
   borderRadius: 14,
   border: `1px solid ${theme.palette.divider}`,
   background: theme.palette.background.paper,
-}))
+}));
 
 // Tag container for .tag
 export const Tag = styled(Box)(({ theme }) => ({
@@ -18,7 +18,7 @@ export const Tag = styled(Box)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
   padding: '6px 10px',
   borderRadius: 999,
-}))
+}));
 
 // Pill for .pill
 export const Pill = styled(Box)(({ theme }) => ({
@@ -28,7 +28,7 @@ export const Pill = styled(Box)(({ theme }) => ({
   borderRadius: 999,
   fontSize: 12,
   fontWeight: 800,
-}))
+}));
 
 // Chip for .chip
 export const Chip = styled(MuiChip)(({ theme }) => ({
@@ -36,7 +36,7 @@ export const Chip = styled(MuiChip)(({ theme }) => ({
   background: theme.palette.background.paper,
   border: `1px solid ${theme.palette.divider}`,
   '& .MuiChip-label': { paddingInline: 10, paddingBlock: 6 },
-}))
+}));
 
 // Ghost button equivalent of .ghost
 export const GhostButton = styled(Button)(({ theme }) => ({
@@ -44,7 +44,7 @@ export const GhostButton = styled(Button)(({ theme }) => ({
   color: theme.palette.text.primary,
   border: `1px solid ${theme.palette.divider}`,
   textTransform: 'none',
-}))
+}));
 
 // Grid for planner .grid
 export const GridPlanner = styled('div')(({ theme }) => ({
@@ -55,7 +55,7 @@ export const GridPlanner = styled('div')(({ theme }) => ({
     gridTemplateColumns: '110px 1fr',
     '& .cell.meal': { gridColumn: '2 / -1' },
   },
-}))
+}));
 
 // Cell for .cell
 export const Cell = styled('div')(({ theme }) => ({
@@ -76,7 +76,7 @@ export const Cell = styled('div')(({ theme }) => ({
     fontWeight: 700,
   },
   '&.meal': {},
-}))
+}));
 
 // Meal cell wrapper for .mealCell
 export const MealCell = styled('div')(({ theme }) => ({
@@ -87,7 +87,7 @@ export const MealCell = styled('div')(({ theme }) => ({
   [theme.breakpoints.down(900)]: {
     gridTemplateColumns: '1fr',
   },
-}))
+}));
 
 // Quantity wrapper for .qtyWrap
 export const QtyWrap = styled('div')(({ theme }) => ({
@@ -102,12 +102,10 @@ export const QtyWrap = styled('div')(({ theme }) => ({
     maxWidth: 68,
     textAlign: 'center',
   },
-}))
+}));
 
 // Muted small text for .muted.small
 export const MutedTextSmall = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   fontSize: 12,
-}))
-
-
+}));

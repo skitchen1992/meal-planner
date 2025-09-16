@@ -1,4 +1,4 @@
-import { createTheme } from '@mui/material/styles'
+import { createTheme } from '@mui/material/styles';
 
 // Design tokens extracted from meal-planner.html
 // Base dark palette
@@ -13,7 +13,7 @@ const darkTokens = {
   error: '#ef4444', // bad
   warning: '#f59e0b', // warn
   success: '#22c55e', // good
-}
+};
 
 export const theme = createTheme({
   cssVariables: true,
@@ -61,14 +61,9 @@ export const theme = createTheme({
   shape: { borderRadius: 12 },
   spacing: 8,
   typography: {
-    fontFamily: [
-      'system-ui',
-      '-apple-system',
-      'Segoe UI',
-      'Roboto',
-      'Inter',
-      'sans-serif',
-    ].join(', '),
+    fontFamily: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Inter', 'sans-serif'].join(
+      ', ',
+    ),
     h1: { fontSize: '2rem', fontWeight: 800, lineHeight: 1.2 },
     h2: { fontSize: '1.5rem', fontWeight: 800, lineHeight: 1.25 },
     h3: { fontSize: '1.25rem', fontWeight: 800, lineHeight: 1.3 },
@@ -125,6 +120,4 @@ export const theme = createTheme({
       },
     },
   },
-})
-
-
+});

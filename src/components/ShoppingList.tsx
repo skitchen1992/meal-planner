@@ -1,16 +1,18 @@
-import { Button, Stack, Typography } from '@mui/material'
-import { Card, MutedTextSmall } from './ui/designSystem'
-import { useShoppingList } from '../hooks/useShoppingList'
+import { Button, Stack, Typography } from '@mui/material';
+
+import { useShoppingList } from '../hooks/useShoppingList';
+
+import { Card, MutedTextSmall } from './ui/designSystem';
 
 function ShoppingList() {
-  const { rows, summary, copyText } = useShoppingList()
+  const { rows, summary, copyText } = useShoppingList();
 
   const handleCopy = async () => {
-    if (!rows.length) return
+    if (!rows.length) return;
     try {
-      await navigator.clipboard.writeText(copyText)
+      await navigator.clipboard.writeText(copyText);
     } catch {}
-  }
+  };
 
   return (
     <Card>
@@ -20,22 +22,22 @@ function ShoppingList() {
       </Stack>
       <div style={{ marginTop: 8 }}>
         {!rows.length ? (
-          <Typography color="text.secondary">Выберите блюда — список покупок появится здесь.</Typography>
+          <Typography color="text.secondary">
+            Выберите блюда — список покупок появится здесь.
+          </Typography>
         ) : (
           <ul style={{ margin: 0, paddingLeft: 18 }}>
             {rows.map((r) => (
-              <li key={`${r.name}|${r.unit}`}>{`${r.name} — ${r.qty % 1 === 0 ? r.qty : r.qty.toFixed(2)} ${
-                r.unit || ''
-              }`.trim()}</li>
+              <li key={`${r.name}|${r.unit}`}>
+                {`${r.name} — ${r.qty % 1 === 0 ? r.qty : r.qty.toFixed(2)} ${r.unit || ''}`.trim()}
+              </li>
             ))}
           </ul>
         )}
       </div>
       <MutedTextSmall sx={{ marginTop: 1 }}>{summary}</MutedTextSmall>
     </Card>
-  )
+  );
 }
 
-export default ShoppingList
-
-
+export default ShoppingList;

@@ -1,64 +1,64 @@
-import { createSlice } from '@reduxjs/toolkit'
-import type { PayloadAction } from '@reduxjs/toolkit'
-import { DAYS, MEALS } from '../../constants/planner'
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-export type CellValue = { dish: string; qty: number }
-export type DayState = Record<string, CellValue>
-export type WeekState = Record<string, DayState>
+import { DAYS, MEALS } from '../../constants/planner';
+
+export type CellValue = { dish: string; qty: number };
+export type DayState = Record<string, CellValue>;
+export type WeekState = Record<string, DayState>;
 
 function initEmptyWeek(): WeekState {
-  const obj: WeekState = {} as WeekState
+  const obj: WeekState = {} as WeekState;
   DAYS.forEach((d) => {
-    obj[d] = {} as DayState
+    obj[d] = {} as DayState;
     MEALS.forEach((m) => {
-      obj[d][m] = { dish: '', qty: 1 }
-    })
-  })
-  return obj
+      obj[d][m] = { dish: '', qty: 1 };
+    });
+  });
+  return obj;
 }
 
 const initialState: WeekState = (() => {
   try {
-    const raw = localStorage.getItem('mealPlanner.week.v2')
+    const raw = localStorage.getItem('mealPlanner.week.v2');
     if (raw) {
-      const parsed = JSON.parse(raw) as WeekState
+      const parsed = JSON.parse(raw) as WeekState;
       // minimal migration: ensure structure
-      const out = initEmptyWeek()
+      const out = initEmptyWeek();
       DAYS.forEach((d) => {
         MEALS.forEach((m) => {
-          const v = (parsed as any)?.[d]?.[m]
-          if (typeof v === 'string') out[d][m] = { dish: v || '', qty: 1 }
-          else if (v && typeof v === 'object') out[d][m] = { dish: v.dish || '', qty: Math.max(0, Number(v.qty ?? 1)) }
-        })
-      })
-      return out
+          const v = (parsed as any)?.[d]?.[m];
+          if (typeof v === 'string') out[d][m] = { dish: v || '', qty: 1 };
+          else if (v && typeof v === 'object')
+            out[d][m] = { dish: v.dish || '', qty: Math.max(0, Number(v.qty ?? 1)) };
+        });
+      });
+      return out;
     }
   } catch {}
-  return initEmptyWeek()
-})()
+  return initEmptyWeek();
+})();
 
 const weekSlice = createSlice({
   name: 'week',
   initialState,
   reducers: {
     setCellDish(state, action: PayloadAction<{ day: string; meal: string; dish: string }>) {
-      const { day, meal, dish } = action.payload
-      state[day][meal].dish = dish
+      const { day, meal, dish } = action.payload;
+      state[day][meal].dish = dish;
     },
     setCellQty(state, action: PayloadAction<{ day: string; meal: string; qty: number }>) {
-      const { day, meal, qty } = action.payload
-      state[day][meal].qty = Math.max(0, Math.min(99, qty))
+      const { day, meal, qty } = action.payload;
+      state[day][meal].qty = Math.max(0, Math.min(99, qty));
     },
     resetWeek() {
-      return initEmptyWeek()
+      return initEmptyWeek();
     },
     setWeek(_state, action: PayloadAction<WeekState>) {
-      return action.payload
+      return action.payload;
     },
   },
-})
+});
 
-export const { setCellDish, setCellQty, resetWeek, setWeek } = weekSlice.actions
-export default weekSlice.reducer
-
-
+export const { setCellDish, setCellQty, resetWeek, setWeek } = weekSlice.actions;
+export default weekSlice.reducer;

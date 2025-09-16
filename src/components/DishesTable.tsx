@@ -1,6 +1,18 @@
-import { Button, MenuItem, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material'
-import { Card, MutedTextSmall } from './ui/designSystem'
-import { useAppDispatch, useAppSelector } from '../app/hooks'
+import {
+  Button,
+  MenuItem,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material';
+
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { MEAL_TYPES } from '../constants/planner';
 import {
   addDish,
   addIngredient,
@@ -10,20 +22,25 @@ import {
   setDishName,
   setDishType,
   setIngredient,
-} from '../features/dishes/dishesSlice'
-import { MEAL_TYPES } from '../constants/planner'
+} from '../features/dishes/dishesSlice';
+
+import { Card, MutedTextSmall } from './ui/designSystem';
 
 function DishesTable() {
-  const dispatch = useAppDispatch()
-  const dishes = useAppSelector((s) => s.dishes)
+  const dispatch = useAppDispatch();
+  const dishes = useAppSelector((s) => s.dishes);
 
   return (
     <Card>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Typography variant="h6">📚 Справочник блюд</Typography>
         <Stack direction="row" spacing={1}>
-          <Button variant="contained" onClick={() => dispatch(addDish())}>Добавить блюдо</Button>
-          <Button variant="outlined" onClick={() => dispatch(resetToTemplate())}>Сбросить к шаблону</Button>
+          <Button variant="contained" onClick={() => dispatch(addDish())}>
+            Добавить блюдо
+          </Button>
+          <Button variant="outlined" onClick={() => dispatch(resetToTemplate())}>
+            Сбросить к шаблону
+          </Button>
         </Stack>
       </Stack>
       <Table size="small" sx={{ mt: 1 }}>
@@ -50,7 +67,9 @@ function DishesTable() {
                   select
                   fullWidth
                   value={d.type}
-                  onChange={(e) => dispatch(setDishType({ index: idx, type: e.target.value as any }))}
+                  onChange={(e) =>
+                    dispatch(setDishType({ index: idx, type: e.target.value as any }))
+                  }
                 >
                   {MEAL_TYPES.map((t) => (
                     <MenuItem key={t} value={t}>
@@ -68,7 +87,11 @@ function DishesTable() {
                         value={ing.n}
                         onChange={(e) =>
                           dispatch(
-                            setIngredient({ dishIndex: idx, ingIndex: i, ingredient: { ...ing, n: e.target.value } }),
+                            setIngredient({
+                              dishIndex: idx,
+                              ingIndex: i,
+                              ingredient: { ...ing, n: e.target.value },
+                            }),
                           )
                         }
                         sx={{ flex: 2 }}
@@ -94,12 +117,19 @@ function DishesTable() {
                         value={ing.u}
                         onChange={(e) =>
                           dispatch(
-                            setIngredient({ dishIndex: idx, ingIndex: i, ingredient: { ...ing, u: e.target.value } }),
+                            setIngredient({
+                              dishIndex: idx,
+                              ingIndex: i,
+                              ingredient: { ...ing, u: e.target.value },
+                            }),
                           )
                         }
                         sx={{ flex: 0.6 }}
                       />
-                      <Button color="error" onClick={() => dispatch(removeIngredient({ dishIndex: idx, ingIndex: i }))}>
+                      <Button
+                        color="error"
+                        onClick={() => dispatch(removeIngredient({ dishIndex: idx, ingIndex: i }))}
+                      >
                         Удалить
                       </Button>
                     </Stack>
@@ -108,7 +138,10 @@ function DishesTable() {
               </TableCell>
               <TableCell>
                 <Stack spacing={1}>
-                  <Button variant="outlined" onClick={() => dispatch(addIngredient({ dishIndex: idx }))}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => dispatch(addIngredient({ dishIndex: idx }))}
+                  >
                     Добавить ингредиент
                   </Button>
                   <Button color="error" onClick={() => dispatch(removeDish(idx))}>
@@ -124,9 +157,7 @@ function DishesTable() {
         Формат ингредиента: название | количество | ед. Пример: рис | 70 | г
       </MutedTextSmall>
     </Card>
-  )
+  );
 }
 
-export default DishesTable
-
-
+export default DishesTable;

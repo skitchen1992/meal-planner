@@ -1,15 +1,17 @@
-import { MenuItem, Select, TextField } from '@mui/material'
-import { Fragment } from 'react'
-import { Card } from './ui/designSystem'
-import { GridPlanner, Cell, MealCell, QtyWrap } from './ui/designSystem'
-import { DAYS, MEALS } from '../constants/planner'
-import { useAppDispatch, useAppSelector } from '../app/hooks'
-import { setCellDish, setCellQty } from '../features/week/weekSlice'
+import { MenuItem, Select, TextField } from '@mui/material';
+import { Fragment } from 'react';
+
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { DAYS, MEALS } from '../constants/planner';
+import { setCellDish, setCellQty } from '../features/week/weekSlice';
+
+import { Card } from './ui/designSystem';
+import { GridPlanner, Cell, MealCell, QtyWrap } from './ui/designSystem';
 
 function Planner() {
-  const dispatch = useAppDispatch()
-  const week = useAppSelector((s) => s.week)
-  const dishes = useAppSelector((s) => s.dishes)
+  const dispatch = useAppDispatch();
+  const week = useAppSelector((s) => s.week);
+  const dishes = useAppSelector((s) => s.dishes);
 
   return (
     <Card>
@@ -26,11 +28,11 @@ function Planner() {
               {day}
             </Cell>
             {MEALS.map((meal) => {
-              const entry = week[day][meal]
+              const entry = week[day][meal];
               const options = dishes
                 .slice()
                 .sort((a, b) => a.name.localeCompare(b.name, 'ru'))
-                .filter((d) => d.type === 'Любое' || d.type === meal)
+                .filter((d) => d.type === 'Любое' || d.type === meal);
               return (
                 <Cell key={`${day}-${meal}`} className="cell meal">
                   <MealCell>
@@ -39,7 +41,11 @@ function Planner() {
                       value={entry.dish}
                       onChange={(e) =>
                         dispatch(
-                          setCellDish({ day, meal, dish: typeof e.target.value === 'string' ? e.target.value : '' }),
+                          setCellDish({
+                            day,
+                            meal,
+                            dish: typeof e.target.value === 'string' ? e.target.value : '',
+                          }),
                         )
                       }
                       renderValue={(value) => (value ? value : '— не выбрано —')}
@@ -57,21 +63,21 @@ function Planner() {
                         type="number"
                         inputProps={{ min: 0, step: 0.5 }}
                         value={entry.qty}
-                        onChange={(e) => dispatch(setCellQty({ day, meal, qty: Number(e.target.value || 0) }))}
+                        onChange={(e) =>
+                          dispatch(setCellQty({ day, meal, qty: Number(e.target.value || 0) }))
+                        }
                         sx={{ maxWidth: 78 }}
                       />
                     </QtyWrap>
                   </MealCell>
                 </Cell>
-              )
+              );
             })}
           </Fragment>
         ))}
       </GridPlanner>
     </Card>
-  )
+  );
 }
 
-export default Planner
-
-
+export default Planner;

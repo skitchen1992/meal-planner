@@ -1,571 +1,1000 @@
 <!doctype html>
 <html lang="ru">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Планировщик меню + список покупок (дни, тип блюда, ручные порции)</title>
-<style>
-  :root{
-    --bg:#0f172a; --card:#111827; --muted:#1f2937; --acc:#22c55e;
-    --text:#e5e7eb; --sub:#9ca3af; --border:#374151;
-    --bad:#ef4444; --good:#22c55e; --warn:#f59e0b;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0; background:linear-gradient(145deg,#0b1226,#0f172a 40%,#0b1226);
-    color:var(--text); font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
-    padding:24px;
-  }
-  h1{font-size:24px;margin:0 0 12px}
-  .wrap{max-width:1100px;margin:0 auto;display:grid;gap:16px}
-  .card{
-    background:rgba(17,24,39,.9); border:1px solid var(--border); border-radius:14px; padding:16px;
-    backdrop-filter:saturate(140%) blur(8px); box-shadow:0 8px 28px rgba(0,0,0,.35);
-  }
-  .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
-  label{color:var(--sub); font-weight:600}
-  input[type="number"], select, input[type="text"]{
-    background:var(--muted); color:var(--text); border:1px solid var(--border);
-    border-radius:10px; padding:8px 10px; outline:none; width:100%;
-  }
-  select{min-width:170px}
-  button{
-    background:var(--acc); color:#07210f; border:none; padding:10px 14px; border-radius:12px;
-    font-weight:700; cursor:pointer; transition:transform .04s ease,opacity .2s ease; white-space:nowrap;
-  }
-  button:hover{transform:translateY(-1px)}
-  button.ghost{background:transparent; color:var(--text); border:1px solid var(--border)}
-  button.bad{background:var(--bad); color:#fff}
-  button.warn{background:var(--warn); color:#111}
-  .grid{
-    display:grid; gap:10px;
-    grid-template-columns: 140px repeat(3, 1fr);
-  }
-  .cell{background:var(--muted); padding:8px; border:1px solid var(--border); border-radius:10px}
-  .head{background:transparent; border:none; color:var(--sub); font-weight:800}
-  .day{display:flex;align-items:center;gap:8px;font-weight:700}
-  .mealCell{display:grid; grid-template-columns: 1fr 78px; gap:8px; align-items:center}
-  .qtyWrap{display:flex; gap:6px; align-items:center}
-  .qtyWrap input{max-width:68px; text-align:center}
-  .qtyWrap .lbl{color:var(--sub); font-size:12px}
-  .footer{display:flex;gap:10px;flex-wrap:wrap}
-  .muted{color:var(--sub); font-size:13px}
-  .two-col{display:grid; grid-template-columns: 1fr 1fr; gap:16px}
-  @media (max-width: 900px){
-    .grid{grid-template-columns: 110px 1fr}
-    .grid .cell.meal{grid-column:2 / -1}
-    .two-col{grid-template-columns:1fr}
-    .mealCell{grid-template-columns: 1fr}
-  }
-  ul.clean{margin:0; padding-left:18px}
-  .tag{display:inline-flex;align-items:center;gap:8px; background:var(--muted); border:1px solid var(--border);
-       padding:6px 10px; border-radius:999px}
-  .pill{background:#0ea5e9; color:#082231; padding:2px 8px; border-radius:999px; font-size:12px; font-weight:800}
-  .tbl{width:100%; border-collapse:collapse; font-size:14px}
-  .tbl th,.tbl td{border-bottom:1px solid var(--border); padding:8px; vertical-align:top}
-  .tbl th{color:var(--sub); text-align:left}
-  .right{display:flex;gap:8px;justify-content:flex-end}
-  .ing{display:grid; grid-template-columns: 2fr .6fr .6fr; gap:8px}
-  .small{font-size:12px}
-  .code{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; background:var(--muted);
-        border:1px dashed var(--border); padding:6px 8px; border-radius:8px}
-  .daysFilter{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
-  .chips{display:flex; gap:6px; flex-wrap:wrap}
-  .chip{background:var(--muted); border:1px solid var(--border); padding:6px 10px; border-radius:999px; cursor:pointer}
-</style>
-</head>
-<body>
-<div class="wrap">
-  <div class="row">
-    <h1>Планировщик меню на неделю</h1>
-    <span class="tag">Баз. порций на приём: <span id="serv-pill" class="pill">2</span></span>
-  </div>
-
-  <!-- Настройки и фильтр дней -->
-  <div class="card">
-    <div class="row">
-      <label for="servings">Порций на человека:</label>
-      <input type="number" id="servings" min="1" step="1" value="1" style="max-width:110px">
-      <label for="people">Людей:</label>
-      <input type="number" id="people" min="1" step="1" value="2" style="max-width:110px">
-      <button id="saveBtn">Сохранить меню</button>
-      <button id="clearWeekBtn" class="warn">Очистить неделю</button>
-      <button id="resetBtn" class="bad">Сбросить всё</button>
-      <div style="flex:1"></div>
-      <button id="printBtn" class="ghost">Печать</button>
-      <button id="exportBtn" class="ghost">Экспорт JSON</button>
-      <button id="importBtn" class="ghost">Импорт JSON</button>
-      <input id="importFile" type="file" accept="application/json" style="display:none">
-    </div>
-
-    <div class="row" style="margin-top:10px">
-      <label>Показывать покупки для:</label>
-      <div id="daysFilter" class="daysFilter"></div>
-      <div class="chips">
-        <button id="fltAll" class="ghost">Все</button>
-        <button id="fltWork" class="ghost">Будни</button>
-        <button id="fltWend" class="ghost">Выходные</button>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Планировщик меню + список покупок (дни, тип блюда, ручные порции)</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --card: #111827;
+        --muted: #1f2937;
+        --acc: #22c55e;
+        --text: #e5e7eb;
+        --sub: #9ca3af;
+        --border: #374151;
+        --bad: #ef4444;
+        --good: #22c55e;
+        --warn: #f59e0b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: linear-gradient(145deg, #0b1226, #0f172a 40%, #0b1226);
+        color: var(--text);
+        font:
+          16px/1.5 system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Inter,
+          sans-serif;
+        padding: 24px;
+      }
+      h1 {
+        font-size: 24px;
+        margin: 0 0 12px;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: grid;
+        gap: 16px;
+      }
+      .card {
+        background: rgba(17, 24, 39, 0.9);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 16px;
+        backdrop-filter: saturate(140%) blur(8px);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+      }
+      .row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      label {
+        color: var(--sub);
+        font-weight: 600;
+      }
+      input[type='number'],
+      select,
+      input[type='text'] {
+        background: var(--muted);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 8px 10px;
+        outline: none;
+        width: 100%;
+      }
+      select {
+        min-width: 170px;
+      }
+      button {
+        background: var(--acc);
+        color: #07210f;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          transform 0.04s ease,
+          opacity 0.2s ease;
+        white-space: nowrap;
+      }
+      button:hover {
+        transform: translateY(-1px);
+      }
+      button.ghost {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      button.bad {
+        background: var(--bad);
+        color: #fff;
+      }
+      button.warn {
+        background: var(--warn);
+        color: #111;
+      }
+      .grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: 140px repeat(3, 1fr);
+      }
+      .cell {
+        background: var(--muted);
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .head {
+        background: transparent;
+        border: none;
+        color: var(--sub);
+        font-weight: 800;
+      }
+      .day {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+      }
+      .mealCell {
+        display: grid;
+        grid-template-columns: 1fr 78px;
+        gap: 8px;
+        align-items: center;
+      }
+      .qtyWrap {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .qtyWrap input {
+        max-width: 68px;
+        text-align: center;
+      }
+      .qtyWrap .lbl {
+        color: var(--sub);
+        font-size: 12px;
+      }
+      .footer {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .muted {
+        color: var(--sub);
+        font-size: 13px;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 110px 1fr;
+        }
+        .grid .cell.meal {
+          grid-column: 2 / -1;
+        }
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+        .mealCell {
+          grid-template-columns: 1fr;
+        }
+      }
+      ul.clean {
+        margin: 0;
+        padding-left: 18px;
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--muted);
+        border: 1px solid var(--border);
+        padding: 6px 10px;
+        border-radius: 999px;
+      }
+      .pill {
+        background: #0ea5e9;
+        color: #082231;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .tbl {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      .tbl th,
+      .tbl td {
+        border-bottom: 1px solid var(--border);
+        padding: 8px;
+        vertical-align: top;
+      }
+      .tbl th {
+        color: var(--sub);
+        text-align: left;
+      }
+      .right {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+      .ing {
+        display: grid;
+        grid-template-columns: 2fr 0.6fr 0.6fr;
+        gap: 8px;
+      }
+      .small {
+        font-size: 12px;
+      }
+      .code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 12px;
+        background: var(--muted);
+        border: 1px dashed var(--border);
+        padding: 6px 8px;
+        border-radius: 8px;
+      }
+      .daysFilter {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .chip {
+        background: var(--muted);
+        border: 1px solid var(--border);
+        padding: 6px 10px;
+        border-radius: 999px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="row">
+        <h1>Планировщик меню на неделю</h1>
+        <span class="tag">Баз. порций на приём: <span id="serv-pill" class="pill">2</span></span>
       </div>
-    </div>
 
-    <div class="muted small" style="margin-top:8px">
-      Формула порций: <span class="code">Кол-во = (ингредиент на 1 порцию) × людей × баз. порции × (ручные порции ячейки)</span>
-    </div>
-  </div>
+      <!-- Настройки и фильтр дней -->
+      <div class="card">
+        <div class="row">
+          <label for="servings">Порций на человека:</label>
+          <input type="number" id="servings" min="1" step="1" value="1" style="max-width: 110px" />
+          <label for="people">Людей:</label>
+          <input type="number" id="people" min="1" step="1" value="2" style="max-width: 110px" />
+          <button id="saveBtn">Сохранить меню</button>
+          <button id="clearWeekBtn" class="warn">Очистить неделю</button>
+          <button id="resetBtn" class="bad">Сбросить всё</button>
+          <div style="flex: 1"></div>
+          <button id="printBtn" class="ghost">Печать</button>
+          <button id="exportBtn" class="ghost">Экспорт JSON</button>
+          <button id="importBtn" class="ghost">Импорт JSON</button>
+          <input id="importFile" type="file" accept="application/json" style="display: none" />
+        </div>
 
-  <!-- Календарь -->
-  <div class="card">
-    <div class="grid" id="planner"></div>
-  </div>
+        <div class="row" style="margin-top: 10px">
+          <label>Показывать покупки для:</label>
+          <div id="daysFilter" class="daysFilter"></div>
+          <div class="chips">
+            <button id="fltAll" class="ghost">Все</button>
+            <button id="fltWork" class="ghost">Будни</button>
+            <button id="fltWend" class="ghost">Выходные</button>
+          </div>
+        </div>
 
-  <div class="two-col">
-    <div class="card">
-      <div class="row" style="justify-content:space-between">
-        <h3 style="margin:0">🛒 Список покупок (по выбранным дням)</h3>
-        <div class="right">
-          <button id="copyList">Копировать</button>
+        <div class="muted small" style="margin-top: 8px">
+          Формула порций:
+          <span class="code"
+            >Кол-во = (ингредиент на 1 порцию) × людей × баз. порции × (ручные порции ячейки)</span
+          >
         </div>
       </div>
-      <div id="shoppingList" class="muted" style="margin-top:8px">Выберите блюда — список появится здесь.</div>
-    </div>
 
-    <div class="card">
-      <div class="row" style="justify-content:space-between">
-        <h3 style="margin:0">📚 Справочник блюд</h3>
-        <div class="right">
-          <button id="addDishBtn">Добавить блюдо</button>
-          <button id="resetDishes" class="ghost">Сбросить к шаблону</button>
+      <!-- Календарь -->
+      <div class="card">
+        <div class="grid" id="planner"></div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="row" style="justify-content: space-between">
+            <h3 style="margin: 0">🛒 Список покупок (по выбранным дням)</h3>
+            <div class="right">
+              <button id="copyList">Копировать</button>
+            </div>
+          </div>
+          <div id="shoppingList" class="muted" style="margin-top: 8px">
+            Выберите блюда — список появится здесь.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="row" style="justify-content: space-between">
+            <h3 style="margin: 0">📚 Справочник блюд</h3>
+            <div class="right">
+              <button id="addDishBtn">Добавить блюдо</button>
+              <button id="resetDishes" class="ghost">Сбросить к шаблону</button>
+            </div>
+          </div>
+          <table class="tbl" id="dishTable">
+            <thead>
+              <tr>
+                <th style="width: 22%">Блюдо</th>
+                <th style="width: 120px">Тип</th>
+                <th>Ингредиенты (на 1 порцию)</th>
+                <th style="width: 120px"></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div class="muted small">
+            Формат ингредиента: <span class="code">название | количество | ед.</span>. Пример:
+            <em>рис | 70 | г</em>
+          </div>
         </div>
       </div>
-      <table class="tbl" id="dishTable">
-        <thead>
-          <tr>
-            <th style="width:22%">Блюдо</th>
-            <th style="width:120px">Тип</th>
-            <th>Ингредиенты (на 1 порцию)</th>
-            <th style="width:120px"></th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <div class="muted small">Формат ингредиента: <span class="code">название | количество | ед.</span>. Пример: <em>рис | 70 | г</em></div>
+
+      <div class="card">
+        <details>
+          <summary><strong>ℹ️ Подсказки</strong></summary>
+          <ul class="clean">
+            <li>
+              В каждой ячейке можно выбрать блюдо и указать
+              <strong>ручные порции</strong> (множитель).
+            </li>
+            <li>
+              Список блюд в ячейках фильтруется по типу приёма пищи (Завтрак/Обед/Ужин/Любое).
+            </li>
+            <li>Список покупок строится по <strong>выбранным дням</strong> (галочки сверху).</li>
+            <li>Все данные сохраняются в браузере (localStorage). Экспорт/импорт — в JSON.</li>
+          </ul>
+        </details>
+      </div>
     </div>
-  </div>
 
-  <div class="card">
-    <details>
-      <summary><strong>ℹ️ Подсказки</strong></summary>
-      <ul class="clean">
-        <li>В каждой ячейке можно выбрать блюдо и указать <strong>ручные порции</strong> (множитель).</li>
-        <li>Список блюд в ячейках фильтруется по типу приёма пищи (Завтрак/Обед/Ужин/Любое).</li>
-        <li>Список покупок строится по <strong>выбранным дням</strong> (галочки сверху).</li>
-        <li>Все данные сохраняются в браузере (localStorage). Экспорт/импорт — в JSON.</li>
-      </ul>
-    </details>
-  </div>
-</div>
+    <script>
+      (function () {
+        const DAYS = [
+          'Понедельник',
+          'Вторник',
+          'Среда',
+          'Четверг',
+          'Пятница',
+          'Суббота',
+          'Воскресенье',
+        ];
+        const MEALS = ['Завтрак', 'Обед', 'Ужин'];
+        const MEAL_TYPES = ['Любое', 'Завтрак', 'Обед', 'Ужин'];
 
-<script>
-(function(){
-  const DAYS = ["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"];
-  const MEALS = ["Завтрак","Обед","Ужин"];
-  const MEAL_TYPES = ["Любое","Завтрак","Обед","Ужин"];
+        const LS_KEYS = {
+          DISHES: 'mealPlanner.dishes.v2',
+          WEEK: 'mealPlanner.week.v2',
+          SETTINGS: 'mealPlanner.settings.v1',
+          FILTER: 'mealPlanner.filterDays.v1',
+        };
 
-  const LS_KEYS = {
-    DISHES: "mealPlanner.dishes.v2",
-    WEEK: "mealPlanner.week.v2",
-    SETTINGS: "mealPlanner.settings.v1",
-    FILTER: "mealPlanner.filterDays.v1"
-  };
+        // --- шаблон блюд с типами
+        const templateDishes = [
+          {
+            name: 'Овсянка',
+            type: 'Завтрак',
+            ingredients: [
+              { n: 'овсяные хлопья', q: 50, u: 'г' },
+              { n: 'молоко', q: 200, u: 'мл' },
+              { n: 'яблоко', q: 0.5, u: 'шт' },
+              { n: 'мёд', q: 1, u: 'ст.л.' },
+            ],
+          },
+          {
+            name: 'Омлет с овощами',
+            type: 'Завтрак',
+            ingredients: [
+              { n: 'яйца', q: 2, u: 'шт' },
+              { n: 'молоко', q: 30, u: 'мл' },
+              { n: 'помидор', q: 0.5, u: 'шт' },
+              { n: 'перец сладкий', q: 0.25, u: 'шт' },
+              { n: 'масло оливковое', q: 1, u: 'ч.л.' },
+            ],
+          },
+          {
+            name: 'Суп чечевичный',
+            type: 'Обед',
+            ingredients: [
+              { n: 'чечевица', q: 80, u: 'г' },
+              { n: 'морковь', q: 0.5, u: 'шт' },
+              { n: 'лук', q: 0.5, u: 'шт' },
+              { n: 'томатная паста', q: 1, u: 'ст.л.' },
+              { n: 'масло растительное', q: 1, u: 'ст.л.' },
+              { n: 'специи', q: 1, u: 'щепотка' },
+            ],
+          },
+          {
+            name: 'Курица с рисом',
+            type: 'Ужин',
+            ingredients: [
+              { n: 'куриная грудка', q: 150, u: 'г' },
+              { n: 'рис', q: 70, u: 'г' },
+              { n: 'масло растительное', q: 1, u: 'ст.л.' },
+              { n: 'специи', q: 1, u: 'щепотка' },
+            ],
+          },
+          {
+            name: 'Паста с овощами',
+            type: 'Обед',
+            ingredients: [
+              { n: 'макароны', q: 100, u: 'г' },
+              { n: 'кабачок', q: 0.5, u: 'шт' },
+              { n: 'томат', q: 1, u: 'шт' },
+              { n: 'чеснок', q: 1, u: 'зубчик' },
+              { n: 'оливковое масло', q: 1, u: 'ст.л.' },
+            ],
+          },
+          {
+            name: 'Рыба запечённая',
+            type: 'Ужин',
+            ingredients: [
+              { n: 'филе рыбы', q: 160, u: 'г' },
+              { n: 'лимон', q: 0.25, u: 'шт' },
+              { n: 'масло оливковое', q: 1, u: 'ст.л.' },
+              { n: 'соль', q: 1, u: 'щепотка' },
+            ],
+          },
+          {
+            name: 'Салат греческий',
+            type: 'Любое',
+            ingredients: [
+              { n: 'огурец', q: 0.5, u: 'шт' },
+              { n: 'помидор', q: 1, u: 'шт' },
+              { n: 'перец сладкий', q: 0.25, u: 'шт' },
+              { n: 'фета', q: 60, u: 'г' },
+              { n: 'оливки', q: 40, u: 'г' },
+              { n: 'оливковое масло', q: 1, u: 'ст.л.' },
+            ],
+          },
+          {
+            name: 'Борщ быстрый',
+            type: 'Обед',
+            ingredients: [
+              { n: 'свекла', q: 0.5, u: 'шт' },
+              { n: 'капуста', q: 150, u: 'г' },
+              { n: 'морковь', q: 0.5, u: 'шт' },
+              { n: 'лук', q: 0.5, u: 'шт' },
+              { n: 'томатная паста', q: 1, u: 'ст.л.' },
+            ],
+          },
+          {
+            name: 'Лосось с булгуром',
+            type: 'Ужин',
+            ingredients: [
+              { n: 'лосось', q: 170, u: 'г' },
+              { n: 'булгур', q: 70, u: 'г' },
+              { n: 'лимон', q: 0.25, u: 'шт' },
+              { n: 'оливковое масло', q: 1, u: 'ст.л.' },
+            ],
+          },
+          {
+            name: 'Сэндвич с индейкой',
+            type: 'Любое',
+            ingredients: [
+              { n: 'хлеб', q: 2, u: 'ломт' },
+              { n: 'индейка (нарезка)', q: 60, u: 'г' },
+              { n: 'сыр', q: 30, u: 'г' },
+              { n: 'листья салата', q: 2, u: 'шт' },
+            ],
+          },
+        ];
 
-  // --- шаблон блюд с типами
-  const templateDishes = [
-    { name:"Овсянка", type:"Завтрак",
-      ingredients:[ {n:"овсяные хлопья",q:50,u:"г"}, {n:"молоко",q:200,u:"мл"}, {n:"яблоко",q:0.5,u:"шт"}, {n:"мёд",q:1,u:"ст.л."} ] },
-    { name:"Омлет с овощами", type:"Завтрак",
-      ingredients:[ {n:"яйца",q:2,u:"шт"}, {n:"молоко",q:30,u:"мл"}, {n:"помидор",q:0.5,u:"шт"}, {n:"перец сладкий",q:0.25,u:"шт"}, {n:"масло оливковое",q:1,u:"ч.л."} ] },
-    { name:"Суп чечевичный", type:"Обед",
-      ingredients:[ {n:"чечевица",q:80,u:"г"}, {n:"морковь",q:0.5,u:"шт"}, {n:"лук",q:0.5,u:"шт"}, {n:"томатная паста",q:1,u:"ст.л."}, {n:"масло растительное",q:1,u:"ст.л."}, {n:"специи",q:1,u:"щепотка"} ] },
-    { name:"Курица с рисом", type:"Ужин",
-      ingredients:[ {n:"куриная грудка",q:150,u:"г"}, {n:"рис",q:70,u:"г"}, {n:"масло растительное",q:1,u:"ст.л."}, {n:"специи",q:1,u:"щепотка"} ] },
-    { name:"Паста с овощами", type:"Обед",
-      ingredients:[ {n:"макароны",q:100,u:"г"}, {n:"кабачок",q:0.5,u:"шт"}, {n:"томат",q:1,u:"шт"}, {n:"чеснок",q:1,u:"зубчик"}, {n:"оливковое масло",q:1,u:"ст.л."} ] },
-    { name:"Рыба запечённая", type:"Ужин",
-      ingredients:[ {n:"филе рыбы",q:160,u:"г"}, {n:"лимон",q:0.25,u:"шт"}, {n:"масло оливковое",q:1,u:"ст.л."}, {n:"соль",q:1,u:"щепотка"} ] },
-    { name:"Салат греческий", type:"Любое",
-      ingredients:[ {n:"огурец",q:0.5,u:"шт"}, {n:"помидор",q:1,u:"шт"}, {n:"перец сладкий",q:0.25,u:"шт"}, {n:"фета",q:60,u:"г"}, {n:"оливки",q:40,u:"г"}, {n:"оливковое масло",q:1,u:"ст.л."} ] },
-    { name:"Борщ быстрый", type:"Обед",
-      ingredients:[ {n:"свекла",q:0.5,u:"шт"}, {n:"капуста",q:150,u:"г"}, {n:"морковь",q:0.5,u:"шт"}, {n:"лук",q:0.5,u:"шт"}, {n:"томатная паста",q:1,u:"ст.л."} ] },
-    { name:"Лосось с булгуром", type:"Ужин",
-      ingredients:[ {n:"лосось",q:170,u:"г"}, {n:"булгур",q:70,u:"г"}, {n:"лимон",q:0.25,u:"шт"}, {n:"оливковое масло",q:1,u:"ст.л."} ] },
-    { name:"Сэндвич с индейкой", type:"Любое",
-      ingredients:[ {n:"хлеб",q:2,u:"ломт"}, {n:"индейка (нарезка)",q:60,u:"г"}, {n:"сыр",q:30,u:"г"}, {n:"листья салата",q:2,u:"шт"} ] }
-  ];
+        // --- состояние
+        let dishes = load(LS_KEYS.DISHES) || templateDishes;
+        let week = migrateWeek(load(LS_KEYS.WEEK)) || initEmptyWeek(); // с qty
+        let settings = load(LS_KEYS.SETTINGS) || { people: 2, servingsPerPerson: 1 };
+        let filterDays = load(LS_KEYS.FILTER) || DAYS.slice(); // все включены
 
-  // --- состояние
-  let dishes = load(LS_KEYS.DISHES) || templateDishes;
-  let week = migrateWeek(load(LS_KEYS.WEEK)) || initEmptyWeek(); // с qty
-  let settings = load(LS_KEYS.SETTINGS) || { people: 2, servingsPerPerson: 1 };
-  let filterDays = load(LS_KEYS.FILTER) || DAYS.slice(); // все включены
+        // элементы
+        const plannerEl = document.getElementById('planner');
+        const shoppingEl = document.getElementById('shoppingList');
+        const peopleEl = document.getElementById('people');
+        const servEl = document.getElementById('servings');
+        const servPill = document.getElementById('serv-pill');
+        const daysFilterEl = document.getElementById('daysFilter');
 
-  // элементы
-  const plannerEl = document.getElementById("planner");
-  const shoppingEl = document.getElementById("shoppingList");
-  const peopleEl = document.getElementById("people");
-  const servEl = document.getElementById("servings");
-  const servPill = document.getElementById("serv-pill");
-  const daysFilterEl = document.getElementById("daysFilter");
-
-  // построение фильтра дней
-  function renderDayFilter(){
-    daysFilterEl.innerHTML = "";
-    DAYS.forEach(d=>{
-      const id = "day-" + d;
-      const label = document.createElement("label");
-      label.style.display="inline-flex"; label.style.alignItems="center"; label.style.gap="6px";
-      const cb = document.createElement("input"); cb.type="checkbox"; cb.id=id; cb.checked = filterDays.includes(d);
-      cb.addEventListener("change", ()=>{
-        if(cb.checked){ if(!filterDays.includes(d)) filterDays.push(d); }
-        else{ filterDays = filterDays.filter(x=>x!==d); }
-        save(LS_KEYS.FILTER, filterDays);
-        recompute();
-      });
-      label.appendChild(cb);
-      const txt = document.createElement("span"); txt.textContent = d;
-      label.appendChild(txt);
-      daysFilterEl.appendChild(label);
-    });
-
-    document.getElementById("fltAll").onclick = ()=>{ filterDays = DAYS.slice(); save(LS_KEYS.FILTER, filterDays); renderDayFilter(); recompute(); };
-    document.getElementById("fltWork").onclick = ()=>{ filterDays = DAYS.slice(0,5); save(LS_KEYS.FILTER, filterDays); renderDayFilter(); recompute(); };
-    document.getElementById("fltWend").onclick = ()=>{ filterDays = DAYS.slice(5); save(LS_KEYS.FILTER, filterDays); renderDayFilter(); recompute(); };
-  }
-
-  // календарь
-  function renderPlanner(){
-    plannerEl.innerHTML = "";
-    addCell("День", true);
-    MEALS.forEach(m=> addCell(m, true));
-    DAYS.forEach(day=>{
-      addCell(day, false, "day");
-      MEALS.forEach(meal=>{
-        const cell = addCell("", false, "meal");
-        const wrap = document.createElement("div");
-        wrap.className = "mealCell";
-
-        // select блюд по типу
-        const select = document.createElement("select");
-        const noneOpt = document.createElement("option"); noneOpt.value = ""; noneOpt.textContent = "— не выбрано —";
-        select.appendChild(noneOpt);
-        dishes
-          .slice()
-          .sort((a,b)=>a.name.localeCompare(b.name,"ru"))
-          .filter(d=> d.type==="Любое" || d.type===meal)
-          .forEach(d=>{
-            const opt = document.createElement("option");
-            opt.value = d.name; opt.textContent = `${d.name}`;
-            select.appendChild(opt);
+        // построение фильтра дней
+        function renderDayFilter() {
+          daysFilterEl.innerHTML = '';
+          DAYS.forEach((d) => {
+            const id = 'day-' + d;
+            const label = document.createElement('label');
+            label.style.display = 'inline-flex';
+            label.style.alignItems = 'center';
+            label.style.gap = '6px';
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.id = id;
+            cb.checked = filterDays.includes(d);
+            cb.addEventListener('change', () => {
+              if (cb.checked) {
+                if (!filterDays.includes(d)) filterDays.push(d);
+              } else {
+                filterDays = filterDays.filter((x) => x !== d);
+              }
+              save(LS_KEYS.FILTER, filterDays);
+              recompute();
+            });
+            label.appendChild(cb);
+            const txt = document.createElement('span');
+            txt.textContent = d;
+            label.appendChild(txt);
+            daysFilterEl.appendChild(label);
           });
 
-        // qty на ячейку (ручные порции)
-        const qtyWrap = document.createElement("div");
-        qtyWrap.className = "qtyWrap";
-        const qtyLbl = document.createElement("span"); qtyLbl.className="lbl"; qtyLbl.textContent = "Порц.:";
-        const qtyInput = document.createElement("input"); qtyInput.type="number"; qtyInput.min="0"; qtyInput.step="0.5"; qtyInput.value="1";
-
-        // загрузка сохраненного значения
-        const stored = week[day]?.[meal];
-        if(typeof stored === "string"){
-          select.value = stored || "";
-          qtyInput.value = 1;
-        }else if(stored && typeof stored === "object"){
-          select.value = stored.dish || "";
-          qtyInput.value = stored.qty ?? 1;
+          document.getElementById('fltAll').onclick = () => {
+            filterDays = DAYS.slice();
+            save(LS_KEYS.FILTER, filterDays);
+            renderDayFilter();
+            recompute();
+          };
+          document.getElementById('fltWork').onclick = () => {
+            filterDays = DAYS.slice(0, 5);
+            save(LS_KEYS.FILTER, filterDays);
+            renderDayFilter();
+            recompute();
+          };
+          document.getElementById('fltWend').onclick = () => {
+            filterDays = DAYS.slice(5);
+            save(LS_KEYS.FILTER, filterDays);
+            renderDayFilter();
+            recompute();
+          };
         }
 
-        select.addEventListener("change", ()=>{
-          week[day][meal] = { dish: select.value, qty: clampNum(qtyInput.value,0,99,1) };
-          save(LS_KEYS.WEEK, week);
-          recompute();
-        });
-        qtyInput.addEventListener("change", ()=>{
-          week[day][meal] = { dish: select.value, qty: clampNum(qtyInput.value,0,99,1) };
-          save(LS_KEYS.WEEK, week);
-          recompute();
-        });
+        // календарь
+        function renderPlanner() {
+          plannerEl.innerHTML = '';
+          addCell('День', true);
+          MEALS.forEach((m) => addCell(m, true));
+          DAYS.forEach((day) => {
+            addCell(day, false, 'day');
+            MEALS.forEach((meal) => {
+              const cell = addCell('', false, 'meal');
+              const wrap = document.createElement('div');
+              wrap.className = 'mealCell';
 
-        qtyWrap.append(qtyLbl, qtyInput);
-        wrap.append(select, qtyWrap);
-        cell.appendChild(wrap);
-      });
-    });
-  }
+              // select блюд по типу
+              const select = document.createElement('select');
+              const noneOpt = document.createElement('option');
+              noneOpt.value = '';
+              noneOpt.textContent = '— не выбрано —';
+              select.appendChild(noneOpt);
+              dishes
+                .slice()
+                .sort((a, b) => a.name.localeCompare(b.name, 'ru'))
+                .filter((d) => d.type === 'Любое' || d.type === meal)
+                .forEach((d) => {
+                  const opt = document.createElement('option');
+                  opt.value = d.name;
+                  opt.textContent = `${d.name}`;
+                  select.appendChild(opt);
+                });
 
-  function addCell(text, head=false, extraClass=""){
-    const div = document.createElement("div");
-    div.className = "cell " + (head? "head":"") + " " + extraClass;
-    if(text) div.textContent = text;
-    plannerEl.appendChild(div);
-    return div;
-  }
+              // qty на ячейку (ручные порции)
+              const qtyWrap = document.createElement('div');
+              qtyWrap.className = 'qtyWrap';
+              const qtyLbl = document.createElement('span');
+              qtyLbl.className = 'lbl';
+              qtyLbl.textContent = 'Порц.:';
+              const qtyInput = document.createElement('input');
+              qtyInput.type = 'number';
+              qtyInput.min = '0';
+              qtyInput.step = '0.5';
+              qtyInput.value = '1';
 
-  function initEmptyWeek(){
-    const obj = {};
-    DAYS.forEach(d=>{
-      obj[d] = {}; MEALS.forEach(m=> obj[d][m] = { dish:"", qty:1 });
-    });
-    return obj;
-  }
-  // миграция старого формата (строка -> объект с qty)
-  function migrateWeek(w){
-    if(!w) return null;
-    const out = {};
-    for(const d of DAYS){
-      out[d] = {};
-      for(const m of MEALS){
-        const v = w[d]?.[m];
-        if(typeof v === "string") out[d][m] = { dish: v || "", qty: 1 };
-        else if(v && typeof v === "object") out[d][m] = { dish: v.dish || "", qty: v.qty ?? 1 };
-        else out[d][m] = { dish:"", qty:1 };
-      }
-    }
-    return out;
-  }
+              // загрузка сохраненного значения
+              const stored = week[day]?.[meal];
+              if (typeof stored === 'string') {
+                select.value = stored || '';
+                qtyInput.value = 1;
+              } else if (stored && typeof stored === 'object') {
+                select.value = stored.dish || '';
+                qtyInput.value = stored.qty ?? 1;
+              }
 
-  function recompute(){
-    // агрегируем ингредиенты
-    const counts = {}; // key: name|unit -> qty
-    const people = clampInt(peopleEl.value,1,32);
-    const servPer = clampInt(servEl.value,1,8);
-    servPill.textContent = String(people * servPer);
+              select.addEventListener('change', () => {
+                week[day][meal] = { dish: select.value, qty: clampNum(qtyInput.value, 0, 99, 1) };
+                save(LS_KEYS.WEEK, week);
+                recompute();
+              });
+              qtyInput.addEventListener('change', () => {
+                week[day][meal] = { dish: select.value, qty: clampNum(qtyInput.value, 0, 99, 1) };
+                save(LS_KEYS.WEEK, week);
+                recompute();
+              });
 
-    for(const day of DAYS){
-      if(!filterDays.includes(day)) continue; // фильтр дней
-      for(const meal of MEALS){
-        const entry = week[day][meal];
-        const dishName = (typeof entry==="object") ? entry.dish : entry;
-        const cellQty = (typeof entry==="object") ? (entry.qty ?? 1) : 1;
-        if(!dishName) continue;
-        const dish = dishes.find(d=>d.name===dishName);
-        if(!dish) continue;
-
-        dish.ingredients.forEach(ing=>{
-          const key = (ing.n.trim().toLowerCase()) + "|" + (ing.u||"");
-          const add = (parseFloat(ing.q)||0) * people * servPer * (parseFloat(cellQty)||1);
-          counts[key] = (counts[key]||0) + add;
-        });
-      }
-    }
-
-    // рендер списка
-    if(Object.keys(counts).length===0){
-      shoppingEl.innerHTML = `<div class="muted">Выберите блюда — список покупок появится здесь.</div>`;
-      return;
-    }
-    const rows = Object.entries(counts).map(([key,qty])=>{
-      const [name, unit] = key.split("|");
-      return {name:capitalize(name), qty:roundSmart(qty), unit};
-    }).sort((a,b)=> a.name.localeCompare(b.name,"ru"));
-
-    const ul = document.createElement("ul");
-    ul.className="clean";
-    rows.forEach(r=>{
-      const li = document.createElement("li");
-      li.textContent = `${r.name} — ${fmtQty(r.qty)} ${r.unit || ""}`.trim();
-      ul.appendChild(li);
-    });
-
-    const summary = document.createElement("div");
-    summary.className="muted small";
-    summary.textContent = `Покупок: ${rows.length}. Дни: ${filterDays.join(", ")}. Баз. порций на приём: ${people*servPer}.`;
-
-    shoppingEl.innerHTML = "";
-    shoppingEl.appendChild(ul);
-    shoppingEl.appendChild(summary);
-  }
-
-  // утилиты
-  function fmtQty(q){ return (q % 1 === 0) ? q.toString() : q.toFixed(2).replace(/\.00$/,""); }
-  function roundSmart(x){ return Math.round(x*100)/100; }
-  function capitalize(s){ return s? s.charAt(0).toUpperCase()+s.slice(1) : ""; }
-  function clampInt(v,min,max){ v=parseInt(v,10); if(isNaN(v)) v=min; return Math.min(max, Math.max(min, v)); }
-  function clampNum(v,min,max,def){ v=parseFloat(v); if(isNaN(v)) v=def; return Math.min(max, Math.max(min, v)); }
-  function save(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
-  function load(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch{ return null; } }
-
-  // --- справочник блюд (CRUD) + поле «Тип»
-  const dishTableBody = document.querySelector("#dishTable tbody");
-  function renderDishes(){
-    dishTableBody.innerHTML = "";
-    dishes.forEach((d,idx)=>{
-      const tr = document.createElement("tr");
-      const tdName = document.createElement("td");
-      const tdType = document.createElement("td");
-      const tdIngs = document.createElement("td");
-      const tdAct = document.createElement("td");
-
-      const nameInput = document.createElement("input");
-      nameInput.type="text"; nameInput.value=d.name;
-      nameInput.addEventListener("change", ()=>{
-        d.name = nameInput.value.trim(); save(LS_KEYS.DISHES, dishes); renderPlanner(); recompute();
-      });
-      tdName.appendChild(nameInput);
-
-      const typeSel = document.createElement("select");
-      MEAL_TYPES.forEach(t=>{
-        const o = document.createElement("option"); o.value=t; o.textContent=t; typeSel.appendChild(o);
-      });
-      typeSel.value = d.type || "Любое";
-      typeSel.addEventListener("change", ()=>{
-        d.type = typeSel.value; save(LS_KEYS.DISHES, dishes); renderPlanner(); recompute();
-      });
-      tdType.appendChild(typeSel);
-
-      const wrap = document.createElement("div"); wrap.className="ing";
-      function renderIngRows(){
-        wrap.innerHTML="";
-        d.ingredients.forEach((ing,i)=>{
-          const in1 = document.createElement("input"); in1.placeholder="Название"; in1.value=ing.n||"";
-          const in2 = document.createElement("input"); in2.placeholder="Кол-во"; in2.type="number"; in2.step="0.01"; in2.value=ing.q||0;
-          const in3 = document.createElement("input"); in3.placeholder="Ед. (г, мл, шт…)"; in3.value=ing.u||"";
-          [in1,in2,in3].forEach(el=> el.addEventListener("change", ()=>{
-            d.ingredients[i] = { n: in1.value.trim(), q: parseFloat(in2.value)||0, u: in3.value.trim() };
-            save(LS_KEYS.DISHES, dishes); recompute();
-          }));
-          wrap.append(in1,in2,in3);
-        });
-      }
-      renderIngRows();
-
-      const addIngBtn = document.createElement("button");
-      addIngBtn.textContent="Добавить ингредиент";
-      addIngBtn.className="ghost";
-      addIngBtn.addEventListener("click", ()=>{
-        d.ingredients.push({n:"",q:0,u:""});
-        save(LS_KEYS.DISHES, dishes); renderDishes(); recompute();
-      });
-
-      const delBtn = document.createElement("button"); delBtn.textContent="Удалить"; delBtn.className="bad";
-      delBtn.addEventListener("click", ()=>{
-        if(confirm(`Удалить блюдо «${d.name}»?`)){
-          dishes.splice(idx,1); save(LS_KEYS.DISHES, dishes);
-          renderDishes(); renderPlanner(); recompute();
+              qtyWrap.append(qtyLbl, qtyInput);
+              wrap.append(select, qtyWrap);
+              cell.appendChild(wrap);
+            });
+          });
         }
-      });
 
-      tdIngs.appendChild(wrap);
-      tdAct.appendChild(addIngBtn);
-      tdAct.appendChild(document.createElement("div")).style.height="6px";
-      tdAct.appendChild(delBtn);
+        function addCell(text, head = false, extraClass = '') {
+          const div = document.createElement('div');
+          div.className = 'cell ' + (head ? 'head' : '') + ' ' + extraClass;
+          if (text) div.textContent = text;
+          plannerEl.appendChild(div);
+          return div;
+        }
 
-      tr.append(tdName, tdType, tdIngs, tdAct);
-      dishTableBody.appendChild(tr);
-    });
-  }
+        function initEmptyWeek() {
+          const obj = {};
+          DAYS.forEach((d) => {
+            obj[d] = {};
+            MEALS.forEach((m) => (obj[d][m] = { dish: '', qty: 1 }));
+          });
+          return obj;
+        }
+        // миграция старого формата (строка -> объект с qty)
+        function migrateWeek(w) {
+          if (!w) return null;
+          const out = {};
+          for (const d of DAYS) {
+            out[d] = {};
+            for (const m of MEALS) {
+              const v = w[d]?.[m];
+              if (typeof v === 'string') out[d][m] = { dish: v || '', qty: 1 };
+              else if (v && typeof v === 'object')
+                out[d][m] = { dish: v.dish || '', qty: v.qty ?? 1 };
+              else out[d][m] = { dish: '', qty: 1 };
+            }
+          }
+          return out;
+        }
 
-  // элементы управления
-  document.getElementById("addDishBtn").addEventListener("click", ()=>{
-    dishes.push({name:"Новое блюдо", type:"Любое", ingredients:[{n:"ингредиент", q:1, u:"шт"}]});
-    save(LS_KEYS.DISHES, dishes); renderDishes(); renderPlanner();
-  });
+        function recompute() {
+          // агрегируем ингредиенты
+          const counts = {}; // key: name|unit -> qty
+          const people = clampInt(peopleEl.value, 1, 32);
+          const servPer = clampInt(servEl.value, 1, 8);
+          servPill.textContent = String(people * servPer);
 
-  document.getElementById("resetDishes").addEventListener("click", ()=>{
-    if(confirm("Сбросить справочник блюд к шаблону? Ваши изменения будут удалены.")){
-      dishes = JSON.parse(JSON.stringify(templateDishes));
-      save(LS_KEYS.DISHES, dishes); renderDishes(); renderPlanner(); recompute();
-    }
-  });
+          for (const day of DAYS) {
+            if (!filterDays.includes(day)) continue; // фильтр дней
+            for (const meal of MEALS) {
+              const entry = week[day][meal];
+              const dishName = typeof entry === 'object' ? entry.dish : entry;
+              const cellQty = typeof entry === 'object' ? (entry.qty ?? 1) : 1;
+              if (!dishName) continue;
+              const dish = dishes.find((d) => d.name === dishName);
+              if (!dish) continue;
 
-  peopleEl.value = settings.people;
-  servEl.value = settings.servingsPerPerson;
-  peopleEl.addEventListener("change", ()=>{ settings.people=clampInt(peopleEl.value,1,32); save(LS_KEYS.SETTINGS, settings); recompute(); });
-  servEl.addEventListener("change", ()=>{ settings.servingsPerPerson=clampInt(servEl.value,1,8); save(LS_KEYS.SETTINGS, settings); recompute(); });
+              dish.ingredients.forEach((ing) => {
+                const key = ing.n.trim().toLowerCase() + '|' + (ing.u || '');
+                const add =
+                  (parseFloat(ing.q) || 0) * people * servPer * (parseFloat(cellQty) || 1);
+                counts[key] = (counts[key] || 0) + add;
+              });
+            }
+          }
 
-  document.getElementById("saveBtn").addEventListener("click", ()=>{
-    save(LS_KEYS.WEEK, week);
-    toast("Меню сохранено ✅");
-  });
-  document.getElementById("clearWeekBtn").addEventListener("click", ()=>{
-    if(confirm("Очистить выбранные блюда за неделю?")){
-      week = initEmptyWeek(); save(LS_KEYS.WEEK, week); renderPlanner(); recompute();
-    }
-  });
-  document.getElementById("resetBtn").addEventListener("click", ()=>{
-    if(confirm("Полный сброс данных (меню, блюда, настройки)?")){
-      localStorage.removeItem(LS_KEYS.WEEK);
-      localStorage.removeItem(LS_KEYS.DISHES);
-      localStorage.removeItem(LS_KEYS.SETTINGS);
-      localStorage.removeItem(LS_KEYS.FILTER);
-      dishes = JSON.parse(JSON.stringify(templateDishes));
-      week = initEmptyWeek();
-      settings = {people:2, servingsPerPerson:1};
-      filterDays = DAYS.slice();
-      peopleEl.value = settings.people; servEl.value = settings.servingsPerPerson;
-      renderDayFilter();
-      renderPlanner(); renderDishes(); recompute();
-    }
-  });
-  document.getElementById("printBtn").addEventListener("click", ()=> window.print());
+          // рендер списка
+          if (Object.keys(counts).length === 0) {
+            shoppingEl.innerHTML = `<div class="muted">Выберите блюда — список покупок появится здесь.</div>`;
+            return;
+          }
+          const rows = Object.entries(counts)
+            .map(([key, qty]) => {
+              const [name, unit] = key.split('|');
+              return { name: capitalize(name), qty: roundSmart(qty), unit };
+            })
+            .sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 
-  // экспорт/импорт
-  document.getElementById("exportBtn").addEventListener("click", ()=>{
-    const data = { version:2, settings, dishes, week, filterDays };
-    const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "meal-planner-export.json";
-    a.click();
-    URL.revokeObjectURL(a.href);
-  });
-  document.getElementById("importBtn").addEventListener("click", ()=> document.getElementById("importFile").click());
-  document.getElementById("importFile").addEventListener("change", (e)=>{
-    const file = e.target.files[0]; if(!file) return;
-    const reader = new FileReader();
-    reader.onload = ()=>{
-      try{
-        const data = JSON.parse(reader.result);
-        if(data.dishes) dishes = data.dishes;
-        if(data.week) week = migrateWeek(data.week);
-        if(data.settings) settings = data.settings;
-        if(data.filterDays) filterDays = data.filterDays;
-        peopleEl.value = settings.people; servEl.value = settings.servingsPerPerson;
-        save(LS_KEYS.DISHES, dishes); save(LS_KEYS.WEEK, week); save(LS_KEYS.SETTINGS, settings); save(LS_KEYS.FILTER, filterDays);
+          const ul = document.createElement('ul');
+          ul.className = 'clean';
+          rows.forEach((r) => {
+            const li = document.createElement('li');
+            li.textContent = `${r.name} — ${fmtQty(r.qty)} ${r.unit || ''}`.trim();
+            ul.appendChild(li);
+          });
+
+          const summary = document.createElement('div');
+          summary.className = 'muted small';
+          summary.textContent = `Покупок: ${rows.length}. Дни: ${filterDays.join(', ')}. Баз. порций на приём: ${people * servPer}.`;
+
+          shoppingEl.innerHTML = '';
+          shoppingEl.appendChild(ul);
+          shoppingEl.appendChild(summary);
+        }
+
+        // утилиты
+        function fmtQty(q) {
+          return q % 1 === 0 ? q.toString() : q.toFixed(2).replace(/\.00$/, '');
+        }
+        function roundSmart(x) {
+          return Math.round(x * 100) / 100;
+        }
+        function capitalize(s) {
+          return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+        }
+        function clampInt(v, min, max) {
+          v = parseInt(v, 10);
+          if (isNaN(v)) v = min;
+          return Math.min(max, Math.max(min, v));
+        }
+        function clampNum(v, min, max, def) {
+          v = parseFloat(v);
+          if (isNaN(v)) v = def;
+          return Math.min(max, Math.max(min, v));
+        }
+        function save(k, v) {
+          localStorage.setItem(k, JSON.stringify(v));
+        }
+        function load(k) {
+          try {
+            return JSON.parse(localStorage.getItem(k));
+          } catch {
+            return null;
+          }
+        }
+
+        // --- справочник блюд (CRUD) + поле «Тип»
+        const dishTableBody = document.querySelector('#dishTable tbody');
+        function renderDishes() {
+          dishTableBody.innerHTML = '';
+          dishes.forEach((d, idx) => {
+            const tr = document.createElement('tr');
+            const tdName = document.createElement('td');
+            const tdType = document.createElement('td');
+            const tdIngs = document.createElement('td');
+            const tdAct = document.createElement('td');
+
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.value = d.name;
+            nameInput.addEventListener('change', () => {
+              d.name = nameInput.value.trim();
+              save(LS_KEYS.DISHES, dishes);
+              renderPlanner();
+              recompute();
+            });
+            tdName.appendChild(nameInput);
+
+            const typeSel = document.createElement('select');
+            MEAL_TYPES.forEach((t) => {
+              const o = document.createElement('option');
+              o.value = t;
+              o.textContent = t;
+              typeSel.appendChild(o);
+            });
+            typeSel.value = d.type || 'Любое';
+            typeSel.addEventListener('change', () => {
+              d.type = typeSel.value;
+              save(LS_KEYS.DISHES, dishes);
+              renderPlanner();
+              recompute();
+            });
+            tdType.appendChild(typeSel);
+
+            const wrap = document.createElement('div');
+            wrap.className = 'ing';
+            function renderIngRows() {
+              wrap.innerHTML = '';
+              d.ingredients.forEach((ing, i) => {
+                const in1 = document.createElement('input');
+                in1.placeholder = 'Название';
+                in1.value = ing.n || '';
+                const in2 = document.createElement('input');
+                in2.placeholder = 'Кол-во';
+                in2.type = 'number';
+                in2.step = '0.01';
+                in2.value = ing.q || 0;
+                const in3 = document.createElement('input');
+                in3.placeholder = 'Ед. (г, мл, шт…)';
+                in3.value = ing.u || '';
+                [in1, in2, in3].forEach((el) =>
+                  el.addEventListener('change', () => {
+                    d.ingredients[i] = {
+                      n: in1.value.trim(),
+                      q: parseFloat(in2.value) || 0,
+                      u: in3.value.trim(),
+                    };
+                    save(LS_KEYS.DISHES, dishes);
+                    recompute();
+                  }),
+                );
+                wrap.append(in1, in2, in3);
+              });
+            }
+            renderIngRows();
+
+            const addIngBtn = document.createElement('button');
+            addIngBtn.textContent = 'Добавить ингредиент';
+            addIngBtn.className = 'ghost';
+            addIngBtn.addEventListener('click', () => {
+              d.ingredients.push({ n: '', q: 0, u: '' });
+              save(LS_KEYS.DISHES, dishes);
+              renderDishes();
+              recompute();
+            });
+
+            const delBtn = document.createElement('button');
+            delBtn.textContent = 'Удалить';
+            delBtn.className = 'bad';
+            delBtn.addEventListener('click', () => {
+              if (confirm(`Удалить блюдо «${d.name}»?`)) {
+                dishes.splice(idx, 1);
+                save(LS_KEYS.DISHES, dishes);
+                renderDishes();
+                renderPlanner();
+                recompute();
+              }
+            });
+
+            tdIngs.appendChild(wrap);
+            tdAct.appendChild(addIngBtn);
+            tdAct.appendChild(document.createElement('div')).style.height = '6px';
+            tdAct.appendChild(delBtn);
+
+            tr.append(tdName, tdType, tdIngs, tdAct);
+            dishTableBody.appendChild(tr);
+          });
+        }
+
+        // элементы управления
+        document.getElementById('addDishBtn').addEventListener('click', () => {
+          dishes.push({
+            name: 'Новое блюдо',
+            type: 'Любое',
+            ingredients: [{ n: 'ингредиент', q: 1, u: 'шт' }],
+          });
+          save(LS_KEYS.DISHES, dishes);
+          renderDishes();
+          renderPlanner();
+        });
+
+        document.getElementById('resetDishes').addEventListener('click', () => {
+          if (confirm('Сбросить справочник блюд к шаблону? Ваши изменения будут удалены.')) {
+            dishes = JSON.parse(JSON.stringify(templateDishes));
+            save(LS_KEYS.DISHES, dishes);
+            renderDishes();
+            renderPlanner();
+            recompute();
+          }
+        });
+
+        peopleEl.value = settings.people;
+        servEl.value = settings.servingsPerPerson;
+        peopleEl.addEventListener('change', () => {
+          settings.people = clampInt(peopleEl.value, 1, 32);
+          save(LS_KEYS.SETTINGS, settings);
+          recompute();
+        });
+        servEl.addEventListener('change', () => {
+          settings.servingsPerPerson = clampInt(servEl.value, 1, 8);
+          save(LS_KEYS.SETTINGS, settings);
+          recompute();
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', () => {
+          save(LS_KEYS.WEEK, week);
+          toast('Меню сохранено ✅');
+        });
+        document.getElementById('clearWeekBtn').addEventListener('click', () => {
+          if (confirm('Очистить выбранные блюда за неделю?')) {
+            week = initEmptyWeek();
+            save(LS_KEYS.WEEK, week);
+            renderPlanner();
+            recompute();
+          }
+        });
+        document.getElementById('resetBtn').addEventListener('click', () => {
+          if (confirm('Полный сброс данных (меню, блюда, настройки)?')) {
+            localStorage.removeItem(LS_KEYS.WEEK);
+            localStorage.removeItem(LS_KEYS.DISHES);
+            localStorage.removeItem(LS_KEYS.SETTINGS);
+            localStorage.removeItem(LS_KEYS.FILTER);
+            dishes = JSON.parse(JSON.stringify(templateDishes));
+            week = initEmptyWeek();
+            settings = { people: 2, servingsPerPerson: 1 };
+            filterDays = DAYS.slice();
+            peopleEl.value = settings.people;
+            servEl.value = settings.servingsPerPerson;
+            renderDayFilter();
+            renderPlanner();
+            renderDishes();
+            recompute();
+          }
+        });
+        document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+        // экспорт/импорт
+        document.getElementById('exportBtn').addEventListener('click', () => {
+          const data = { version: 2, settings, dishes, week, filterDays };
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'meal-planner-export.json';
+          a.click();
+          URL.revokeObjectURL(a.href);
+        });
+        document
+          .getElementById('importBtn')
+          .addEventListener('click', () => document.getElementById('importFile').click());
+        document.getElementById('importFile').addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              const data = JSON.parse(reader.result);
+              if (data.dishes) dishes = data.dishes;
+              if (data.week) week = migrateWeek(data.week);
+              if (data.settings) settings = data.settings;
+              if (data.filterDays) filterDays = data.filterDays;
+              peopleEl.value = settings.people;
+              servEl.value = settings.servingsPerPerson;
+              save(LS_KEYS.DISHES, dishes);
+              save(LS_KEYS.WEEK, week);
+              save(LS_KEYS.SETTINGS, settings);
+              save(LS_KEYS.FILTER, filterDays);
+              renderDayFilter();
+              renderPlanner();
+              renderDishes();
+              recompute();
+              toast('Данные импортированы ✅');
+            } catch (err) {
+              alert('Ошибка импорта: ' + err.message);
+            }
+          };
+          reader.readAsText(file);
+          e.target.value = '';
+        });
+
+        // копирование покупок
+        document.getElementById('copyList').addEventListener('click', () => {
+          const text = Array.from(document.querySelectorAll('#shoppingList li'))
+            .map((li) => '- ' + li.textContent)
+            .join('\n');
+          if (!text) {
+            toast('Список пуст 😅');
+            return;
+          }
+          navigator.clipboard
+            .writeText(text)
+            .then(() => toast('Скопировано 📋'))
+            .catch(() => alert('Не удалось скопировать'));
+        });
+
+        // тост
+        function toast(msg) {
+          const t = document.createElement('div');
+          t.textContent = msg;
+          t.style.position = 'fixed';
+          t.style.bottom = '18px';
+          t.style.left = '50%';
+          t.style.transform = 'translateX(-50%)';
+          t.style.background = 'rgba(34,197,94,.95)';
+          t.style.color = '#06250f';
+          t.style.padding = '8px 12px';
+          t.style.borderRadius = '10px';
+          t.style.boxShadow = '0 6px 20px rgba(0,0,0,.25)';
+          t.style.zIndex = '9999';
+          t.style.fontWeight = '800';
+          document.body.appendChild(t);
+          setTimeout(() => {
+            t.style.transition = 'opacity .3s';
+            t.style.opacity = '0';
+          }, 1200);
+          setTimeout(() => t.remove(), 1600);
+        }
+
+        // инициализация
         renderDayFilter();
-        renderPlanner(); renderDishes(); recompute();
-        toast("Данные импортированы ✅");
-      }catch(err){
-        alert("Ошибка импорта: " + err.message);
-      }
-    };
-    reader.readAsText(file);
-    e.target.value="";
-  });
-
-  // копирование покупок
-  document.getElementById("copyList").addEventListener("click", ()=>{
-    const text = Array.from(document.querySelectorAll("#shoppingList li")).map(li=>"- "+li.textContent).join("\n");
-    if(!text){ toast("Список пуст 😅"); return; }
-    navigator.clipboard.writeText(text).then(()=> toast("Скопировано 📋")).catch(()=> alert("Не удалось скопировать"));
-  });
-
-  // тост
-  function toast(msg){
-    const t = document.createElement("div");
-    t.textContent = msg;
-    t.style.position="fixed"; t.style.bottom="18px"; t.style.left="50%"; t.style.transform="translateX(-50%)";
-    t.style.background="rgba(34,197,94,.95)"; t.style.color="#06250f"; t.style.padding="8px 12px"; t.style.borderRadius="10px";
-    t.style.boxShadow="0 6px 20px rgba(0,0,0,.25)"; t.style.zIndex="9999"; t.style.fontWeight="800";
-    document.body.appendChild(t);
-    setTimeout(()=>{ t.style.transition="opacity .3s"; t.style.opacity="0"; }, 1200);
-    setTimeout(()=> t.remove(), 1600);
-  }
-
-  // инициализация
-  renderDayFilter();
-  renderPlanner();
-  renderDishes();
-  recompute();
-})();
-</script>
-</body>
+        renderPlanner();
+        renderDishes();
+        recompute();
+      })();
+    </script>
+  </body>
 </html>

@@ -1,34 +1,44 @@
-import { Button, Container, List, ListItem, ListItemText, Stack, TextField, Typography } from '@mui/material'
-import './App.css'
-import { useState } from 'react'
-import { addMeal, removeMeal } from './features/meals/mealsSlice'
-import { useAppDispatch, useAppSelector } from './app/hooks'
-import Header from './components/Header'
-import Planner from './components/Planner'
-import FilterBar from './components/FilterBar'
-import ShoppingList from './components/ShoppingList'
-import DishesTable from './components/DishesTable'
-import { usePersistState } from './hooks/usePersistState'
+import {
+  Button,
+  Container,
+  List,
+  ListItem,
+  ListItemText,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
+import './App.css';
+import { useState } from 'react';
+
+import { useAppDispatch, useAppSelector } from './app/hooks';
+import DishesTable from './components/DishesTable';
+import FilterBar from './components/FilterBar';
+import Header from './components/Header';
+import Planner from './components/Planner';
+import ShoppingList from './components/ShoppingList';
+import { addMeal, removeMeal } from './features/meals/mealsSlice';
+import { usePersistState } from './hooks/usePersistState';
 
 function App() {
-  usePersistState()
-  const dispatch = useAppDispatch()
-  const meals = useAppSelector((state) => state.meals.items)
-  const [title, setTitle] = useState('')
-  const [calories, setCalories] = useState<number | ''>('')
+  usePersistState();
+  const dispatch = useAppDispatch();
+  const meals = useAppSelector((state) => state.meals.items);
+  const [title, setTitle] = useState('');
+  const [calories, setCalories] = useState<number | ''>('');
 
   const handleAdd = () => {
-    if (!title || calories === '' || Number.isNaN(Number(calories))) return
+    if (!title || calories === '' || Number.isNaN(Number(calories))) return;
     dispatch(
       addMeal({
         id: crypto.randomUUID(),
         title,
         calories: Number(calories),
       }),
-    )
-    setTitle('')
-    setCalories('')
-  }
+    );
+    setTitle('');
+    setCalories('');
+  };
 
   return (
     <Container maxWidth="md">
@@ -59,7 +69,11 @@ function App() {
             <ListItem
               key={meal.id}
               secondaryAction={
-                <Button color="error" onClick={() => dispatch(removeMeal(meal.id))} aria-label={`remove ${meal.title}`}>
+                <Button
+                  color="error"
+                  onClick={() => dispatch(removeMeal(meal.id))}
+                  aria-label={`remove ${meal.title}`}
+                >
                   Remove
                 </Button>
               }
@@ -70,7 +84,7 @@ function App() {
         </List>
       </Stack>
     </Container>
-  )
+  );
 }
 
-export default App
+export default App;

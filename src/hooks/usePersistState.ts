@@ -1,37 +1,36 @@
-import { useEffect } from 'react'
-import { useAppSelector } from '../app/hooks'
-import { LS_KEYS } from '../constants/planner'
+import { useEffect } from 'react';
+
+import { useAppSelector } from '../app/hooks';
+import { LS_KEYS } from '../constants/planner';
 
 // Persists core slices to localStorage when they change
 export function usePersistState() {
-  const settings = useAppSelector((s) => s.settings)
-  const week = useAppSelector((s) => s.week)
-  const dishes = useAppSelector((s) => s.dishes)
-  const filterDays = useAppSelector((s) => s.filterDays)
+  const settings = useAppSelector((s) => s.settings);
+  const week = useAppSelector((s) => s.week);
+  const dishes = useAppSelector((s) => s.dishes);
+  const filterDays = useAppSelector((s) => s.filterDays);
 
   useEffect(() => {
     try {
-      localStorage.setItem(LS_KEYS.SETTINGS, JSON.stringify(settings))
+      localStorage.setItem(LS_KEYS.SETTINGS, JSON.stringify(settings));
     } catch {}
-  }, [settings])
+  }, [settings]);
 
   useEffect(() => {
     try {
-      localStorage.setItem(LS_KEYS.WEEK, JSON.stringify(week))
+      localStorage.setItem(LS_KEYS.WEEK, JSON.stringify(week));
     } catch {}
-  }, [week])
+  }, [week]);
 
   useEffect(() => {
     try {
-      localStorage.setItem(LS_KEYS.DISHES, JSON.stringify(dishes))
+      localStorage.setItem(LS_KEYS.DISHES, JSON.stringify(dishes));
     } catch {}
-  }, [dishes])
+  }, [dishes]);
 
   useEffect(() => {
     try {
-      localStorage.setItem(LS_KEYS.FILTER, JSON.stringify(filterDays))
+      localStorage.setItem(LS_KEYS.FILTER, JSON.stringify(filterDays));
     } catch {}
-  }, [filterDays])
+  }, [filterDays]);
 }
-
-

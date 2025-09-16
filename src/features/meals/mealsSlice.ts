@@ -1,37 +1,35 @@
-import { createSlice } from '@reduxjs/toolkit'
-import type { PayloadAction } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
 export type Meal = {
-  id: string
-  title: string
-  calories: number
-}
+  id: string;
+  title: string;
+  calories: number;
+};
 
 type MealsState = {
-  items: Meal[]
-}
+  items: Meal[];
+};
 
 const initialState: MealsState = {
   items: [],
-}
+};
 
 const mealsSlice = createSlice({
   name: 'meals',
   initialState,
   reducers: {
     addMeal: (state, action: PayloadAction<Meal>) => {
-      state.items.push(action.payload)
+      state.items.push(action.payload);
     },
     removeMeal: (state, action: PayloadAction<string>) => {
-      state.items = state.items.filter((meal) => meal.id !== action.payload)
+      state.items = state.items.filter((meal) => meal.id !== action.payload);
     },
     setMeals: (state, action: PayloadAction<Meal[]>) => {
-      state.items = action.payload
+      state.items = action.payload;
     },
   },
-})
+});
 
-export const { addMeal, removeMeal, setMeals } = mealsSlice.actions
-export default mealsSlice.reducer
-
-
+export const { addMeal, removeMeal, setMeals } = mealsSlice.actions;
+export default mealsSlice.reducer;

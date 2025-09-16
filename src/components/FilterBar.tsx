@@ -1,12 +1,14 @@
-import { Stack, Typography } from '@mui/material'
-import { Chip, GhostButton } from './ui/designSystem'
-import { useAppDispatch, useAppSelector } from '../app/hooks'
-import { DAYS } from '../constants/planner'
-import { setAll, setWeekend, setWork, toggleDay } from '../features/filter/filterSlice'
+import { Stack, Typography } from '@mui/material';
+
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { DAYS } from '../constants/planner';
+import { setAll, setWeekend, setWork, toggleDay } from '../features/filter/filterSlice';
+
+import { Chip, GhostButton } from './ui/designSystem';
 
 function FilterBar() {
-  const dispatch = useAppDispatch()
-  const filterDays = useAppSelector((s) => s.filterDays)
+  const dispatch = useAppDispatch();
+  const filterDays = useAppSelector((s) => s.filterDays);
 
   return (
     <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
@@ -30,9 +32,7 @@ function FilterBar() {
         <GhostButton onClick={() => dispatch(setWeekend())}>Выходные</GhostButton>
       </Stack>
     </Stack>
-  )
+  );
 }
 
-export default FilterBar
-
-
+export default FilterBar;
