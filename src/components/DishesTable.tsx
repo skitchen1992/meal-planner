@@ -9,6 +9,7 @@ import {
   TableRow,
   TextField,
   Typography,
+  Paper,
 } from '@mui/material';
 
 import { useAppDispatch, useAppSelector } from '../app/hooks';
@@ -24,14 +25,14 @@ import {
   setIngredient,
 } from '../features/dishes/dishesSlice';
 
-import { Card, MutedTextSmall } from './ui/designSystem';
+// Replaced custom Card/MutedTextSmall with MUI Paper/Typo
 
 function DishesTable() {
   const dispatch = useAppDispatch();
   const dishes = useAppSelector((s) => s.dishes);
 
   return (
-    <Card>
+    <Paper sx={{ p: 2 }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Typography variant="h6">📚 Справочник блюд</Typography>
         <Stack direction="row" spacing={1}>
@@ -158,10 +159,10 @@ function DishesTable() {
           ))}
         </TableBody>
       </Table>
-      <MutedTextSmall sx={{ mt: 1 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
         Формат ингредиента: название | количество | ед. Пример: рис | 70 | г
-      </MutedTextSmall>
-    </Card>
+      </Typography>
+    </Paper>
   );
 }
 

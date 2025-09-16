@@ -1,4 +1,4 @@
-import { Button, Snackbar, Stack, TextField, Typography } from '@mui/material';
+import { Button, Chip, Grid, Snackbar, Stack, TextField, Typography } from '@mui/material';
 import { useRef, useState } from 'react';
 
 import { useAppDispatch, useAppSelector } from '../app/hooks';
@@ -8,7 +8,7 @@ import { setPeople, setServingsPerPerson } from '../features/settings/settingsSl
 import { resetWeek, setWeek } from '../features/week/weekSlice';
 import type { WeekState } from '../features/week/weekSlice';
 
-import { GhostButton, Tag, Pill } from './ui/designSystem';
+// Replaced custom Tag/Pill with MUI Chip
 
 function Header() {
   const dispatch = useAppDispatch();
@@ -122,12 +122,7 @@ function Header() {
         <Typography variant="h4" component="h1" sx={{ m: 0 }}>
           Планировщик меню на неделю
         </Typography>
-        <Tag>
-          <Typography component="span" color="text.secondary" fontWeight={600} sx={{ mr: 0.5 }}>
-            Баз. порций на приём:
-          </Typography>
-          <Pill id="serv-pill">{people * servingsPerPerson}</Pill>
-        </Tag>
+        <Chip color="secondary" label={`Баз. порций на приём: ${people * servingsPerPerson}`} />
       </Stack>
 
       <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
@@ -136,6 +131,7 @@ function Header() {
         </Typography>
         <TextField
           id="servings"
+          size="small"
           type="number"
           value={servingsPerPerson}
           onChange={(e) =>
@@ -153,6 +149,7 @@ function Header() {
         </Typography>
         <TextField
           id="people"
+          size="small"
           type="number"
           value={people}
           onChange={(e) =>
@@ -170,16 +167,24 @@ function Header() {
         <Button color="error" onClick={handleResetAll}>
           Сбросить всё
         </Button>
-        <GhostButton onClick={handlePrint}>Печать</GhostButton>
-        <GhostButton onClick={handleExport}>Экспорт JSON</GhostButton>
-        <GhostButton onClick={handleTriggerImport}>Импорт JSON</GhostButton>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="application/json"
-          style={{ display: 'none' }}
-          onChange={handleImport}
-        />
+        <Grid container gap={2}>
+          <Button variant="outlined" onClick={handlePrint}>
+            Печать
+          </Button>
+          <Button variant="outlined" onClick={handleExport}>
+            Экспорт JSON
+          </Button>
+          <Button variant="outlined" onClick={handleTriggerImport}>
+            Импорт JSON
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json"
+            style={{ display: 'none' }}
+            onChange={handleImport}
+          />
+        </Grid>
       </Stack>
 
       <Snackbar

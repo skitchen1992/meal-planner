@@ -1,5 +1,4 @@
 import { Button, Container, List, ListItem, ListItemText, Stack, TextField } from '@mui/material';
-import './App.css';
 import { useState } from 'react';
 
 import { useAppDispatch, useAppSelector } from './app/hooks';
@@ -34,7 +33,7 @@ function App() {
   };
 
   return (
-    <Container maxWidth="md">
+    <Container maxWidth="lg">
       <Stack spacing={3} mt={4}>
         <Header />
         <Planner />

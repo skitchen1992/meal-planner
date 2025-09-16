@@ -1,10 +1,10 @@
-import { Stack, Typography } from '@mui/material';
+import { Stack, Typography, Button, Chip } from '@mui/material';
 
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { DAYS } from '../constants/planner';
 import { setAll, setWeekend, setWork, toggleDay } from '../features/filter/filterSlice';
 
-import { Chip, GhostButton } from './ui/designSystem';
+// Replaced custom Chip/GhostButton with MUI Chip/Button
 
 function FilterBar() {
   const dispatch = useAppDispatch();
@@ -27,9 +27,15 @@ function FilterBar() {
         ))}
       </Stack>
       <Stack direction="row" spacing={1}>
-        <GhostButton onClick={() => dispatch(setAll())}>Все</GhostButton>
-        <GhostButton onClick={() => dispatch(setWork())}>Будни</GhostButton>
-        <GhostButton onClick={() => dispatch(setWeekend())}>Выходные</GhostButton>
+        <Button variant="outlined" onClick={() => dispatch(setAll())}>
+          Все
+        </Button>
+        <Button variant="outlined" onClick={() => dispatch(setWork())}>
+          Будни
+        </Button>
+        <Button variant="outlined" onClick={() => dispatch(setWeekend())}>
+          Выходные
+        </Button>
       </Stack>
     </Stack>
   );

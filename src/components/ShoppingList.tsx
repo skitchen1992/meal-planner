@@ -1,8 +1,8 @@
-import { Button, Stack, Typography } from '@mui/material';
+import { Button, Stack, Typography, Paper } from '@mui/material';
 
 import { useShoppingList } from '../hooks/useShoppingList';
 
-import { Card, MutedTextSmall } from './ui/designSystem';
+// Replaced custom Card/MutedTextSmall with MUI Paper/Typo
 
 function ShoppingList() {
   const { rows, summary, copyText } = useShoppingList();
@@ -19,7 +19,7 @@ function ShoppingList() {
   };
 
   return (
-    <Card>
+    <Paper sx={{ p: 2 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Typography variant="h6">🛒 Список покупок (по выбранным дням)</Typography>
         <Button onClick={handleCopy}>Копировать</Button>
@@ -39,8 +39,10 @@ function ShoppingList() {
           </ul>
         )}
       </div>
-      <MutedTextSmall sx={{ marginTop: 1 }}>{summary}</MutedTextSmall>
-    </Card>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        {summary}
+      </Typography>
+    </Paper>
   );
 }
 
