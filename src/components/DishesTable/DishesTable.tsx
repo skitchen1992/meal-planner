@@ -35,16 +35,16 @@ function DishesTable() {
         </Stack>
       </Stack>
       <List sx={{ mt: 1 }}>
-        {dishes.map((d, idx) => (
+        {dishes.map((dish, idx) => (
           <ListItem
-            key={`${d.name}-${idx}`}
+            key={`${dish.name}-${idx}`}
             sx={{ pr: 16 }}
             secondaryAction={
               <Stack direction="row" spacing={1} alignItems="center">
                 <IconButton
                   aria-label="Редактировать блюдо"
                   onClick={() =>
-                    dispatch(openModal({ type: 'addDish', payload: { index: idx, dish: d } }))
+                    dispatch(openModal({ type: 'addDish', payload: { index: idx, dish: dish } }))
                   }
                 >
                   <EditIcon />
@@ -55,7 +55,7 @@ function DishesTable() {
                     dispatch(
                       openModal({
                         type: 'confirmDeleteDish',
-                        payload: { index: idx, name: d.name },
+                        payload: { index: idx, name: dish.name },
                       }),
                     )
                   }
@@ -66,15 +66,15 @@ function DishesTable() {
             }
           >
             <ListItemText
-              primary={`${d.name} — ${d.type}`}
+              primary={`${dish.name} — ${dish.type}`}
               slotProps={{ secondary: { sx: { whiteSpace: 'normal', overflowWrap: 'anywhere' } } }}
               secondary={
                 <>
-                  <Typography variant="body2">
-                    {d.ingredients.map((i) => `${i.name} ${i.quantity}${i.unit}`).join(', ')}
+                  <Typography variant="body2" component="span">
+                    {dish.ingredients.map((i) => `${i.name} ${i.quantity}${i.unit}`).join(', ')}
                   </Typography>
-                  <Typography variant="body1">
-                    {d.note && d.note.trim() ? `Заметка: ${d.note.trim()}` : null}
+                  <Typography variant="body1" component="span">
+                    {dish.note && dish.note.trim() ? `Заметка: ${dish.note.trim()}` : null}
                   </Typography>
                 </>
               }

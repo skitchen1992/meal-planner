@@ -126,28 +126,14 @@ const initialState: Dish[] = (() => {
   try {
     const raw = localStorage.getItem('mealPlanner.dishes.v2');
     if (raw) {
-      // Migrate ingredients from legacy keys (n/q/u) to new keys (name/quantity/unit)
-      const parsed = JSON.parse(raw) as unknown as Array<{
-        name: string;
-        type: Dish['type'];
-        note?: string;
-        ingredients: Array<{
-          n?: string;
-          q?: number;
-          u?: string;
-          name?: string;
-          quantity?: number;
-          unit?: string;
-        }>;
-      }>;
-      const migrated = parsed.map((dish) => ({
+      const migrated = JSON.parse(raw).map((dish: Dish) => ({
         name: dish.name,
         type: dish.type,
         note: dish.note,
         ingredients: (dish.ingredients || []).map((ing) => ({
-          name: ing.name ?? ing.n ?? '',
-          quantity: ing.quantity ?? ing.q ?? 0,
-          unit: ing.unit ?? ing.u ?? '',
+          name: ing.name ?? '',
+          quantity: ing.quantity ?? 0,
+          unit: ing.unit ?? '',
         })),
       }));
       return migrated as Dish[];
